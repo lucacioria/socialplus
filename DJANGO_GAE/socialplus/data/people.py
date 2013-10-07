@@ -60,7 +60,7 @@ def save_person(p, user):
         return p_.put()
 
 def save_user(u):
-    old_u_ = ndb.Key(Domain, "main", User, u["id"]).get()
+    old_u_ = ndb.Key(User, u["id"]).get()
 
     # update existing person
     if old_u_:
@@ -69,7 +69,7 @@ def save_user(u):
         return old_u_.key
     # create new person
     else:
-        u_ = User(parent=ndb.Key("Domain", "main", User, u["id"]), id=u["id"])
+        u_ = User(parent=ndb.Key(User, u["id"]), id=u["id"])
         u_.full_name = u["name"]["fullName"]
         u_.primary_email = u["primaryEmail"]
         return u_.put()
