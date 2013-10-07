@@ -9,6 +9,7 @@ urlpatterns = patterns('',
     url(r'^delete_all/users$', 'socialplus.views.delete_users'),
     url(r'^delete_all/activities$', 'socialplus.views.delete_activities'),
     url(r'^delete_all/tasks$', 'socialplus.views.delete_tasks'),
+    url(r'^delete_all/activities_search_index$', 'socialplus.views.delete_activities_search_index'),
     url(r'^reset_domain$', 'socialplus.views.reset_domain'),
     url(r'^start_task/(?P<id_>[^/]+)$', 'socialplus.views.start_task'),
     # ACTIVITY
