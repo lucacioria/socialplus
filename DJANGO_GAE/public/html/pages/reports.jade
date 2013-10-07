@@ -1,0 +1,27 @@
+mixin entry(name, state)
+  li(ng-class="{active: $state.includes('#{state}')}")
+      a(ui-sref="#{state}") #{name}
+#reportsPage(ng-controller='ReportsCtrl', ng-init='initReports()')
+  div
+    .page-header
+      h1 REPORTS
+    .row
+      .col-lg-12
+        div.well
+          form.form-inline
+            fieldset
+              legend select report
+              select(ng-model="d.currentReport",ng-options="x.name for x in d.well.reports.reports.items",style="width: 200px")
+              div(ng-show='d.currentReport!=null', style="display: inline")
+                button.btn.btn-info(ng-click='deleteCurrentReport()') delete
+              p(ng-show="d.reportData != null")
+                small.text-muted report last update {{d.reportData.lastUpdated | formatUTC}}
+              loading(ng-show='d.loading')
+      .row
+        .col-lg-12
+          ul.nav.nav-tabs(ng-controller="MenuCtrl", ng-init="initCookie()")
+            mixin entry('all times', 'reports.detail.ever')
+            mixin entry('by day', 'reports.detail.byDay')
+            mixin entry('by month', 'reports.detail.byMonth')
+            mixin entry('by year', 'reports.detail.byYear')
+          div(ui-view="")

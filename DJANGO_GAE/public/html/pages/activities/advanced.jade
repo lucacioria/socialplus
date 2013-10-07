@@ -1,0 +1,48 @@
+mixin formline_option(label, model)
+	.form-group
+		label.col-lg-2.control-label #{label}
+		.col-lg-10
+			select(ng-model="d.adv.#{model}.value", ng-options="x for x in d.adv.#{model}.options", style="width: 200px; margin-top: 5px")
+				option(value="")
+
+mixin formline(label, model)
+	.form-group
+		label.col-lg-2.control-label #{label}
+		.col-lg-10
+			input.form-control(type="search", ng-model="d.adv.#{model}.value")
+			span negate
+			input.form-control(type="checkbox", ng-model="d.adv.#{model}.negate")
+
+mixin formline_autocomplete(label, model, autocomplete)
+	.form-group
+		label.col-lg-2.control-label #{label}
+		.col-lg-10
+			input.form-control(type="text", ng-model="d.adv.#{model}.value", typeahead="e for e in emails() | filter:$viewValue | limitTo:8")
+			span negate
+			input.form-control(type="checkbox", ng-model="d.adv.#{model}.negate")
+
+#advanced.row
+	.col-lg-12
+		.well
+			form.form-horizontal(role="form")
+				legend advanced search for activities
+				mixin formline('content', 'content_')
+				mixin formline_autocomplete('author\'s email', 'author_')
+				mixin formline('date', 'published_')
+				mixin formline_option('verb', 'verb_')
+				mixin formline_option('visibility', 'visibility_')
+				mixin formline_option('community name', 'community_')
+				mixin formline_option('provider', 'provider_')
+
+				button.btn.btn-primary.pull-right(ng-click='getActivities()') search
+				button.btn.btn-default(ng-click='d.viewCreateReport = !d.viewCreateReport') create report from search
+				div(ng-show="d.viewCreateReport")
+					input.form-control(type="text", ng-model='d.createReportName') name
+					button.btn.btn-primary(ng-click='createReport()', ng-show="!d.viewReportButton.visible", ng-disabled='d.createReportButton.creating') {{d.createReportButton.creating ? "creating report..." : "create report"}}
+					button.btn.btn-success(ng-show="d.viewReportButton.visible"): a(href='#/reports/{{d.createdReportID}}', style="color:#eee; text-decoration: none;") report created! click here to view..
+			div.clearfix
+			pre(style="margin-top:10px; opacity:0.3; ") SEARCH STRING: {{getSearchString()}}
+.row
+	.col-lg-12
+		activity(ng-repeat='a in d.advSearchData.items')
+	a(ng-click="getNextPage()") next..

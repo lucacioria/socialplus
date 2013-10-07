@@ -1,0 +1,6 @@
+p
+	span.badge(style="cursor: pointer; margin-right: 10px", ng-click='getExperts(tag)', ng-repeat="tag in d.tags") {{tag.name}}
+.well
+	div(ng-repeat="p in d.experts")
+		span.badge(style="margin-right: 10px") {{p.expert_level}}
+		a(href="#/person/details/{{p.id_}}") {{p.displayName}}

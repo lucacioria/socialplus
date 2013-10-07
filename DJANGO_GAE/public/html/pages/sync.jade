@@ -1,0 +1,63 @@
+#syncPage(ng-controller='SyncCtrl', ng-init="initTaskRefresh()")
+  .page-header
+    h1 SYNC TASKS
+  div
+    #tasks.row
+      .col-lg-12
+        table.table.table-striped.table-condensed
+          thead
+            tr
+              td 
+                b TASK NAME
+              td 
+                b TASK DESCRIPTION
+              td 
+                b ACTION
+          tbody
+            tr
+              td users
+              td sync all users info from Domain
+              td
+                button.btn.btn-default(ng-click='startSyncTask("syncUsers")') start
+            tr
+              td people from users
+              td sync google plus profiles of all domain users
+              td
+                button.btn.btn-default(ng-click='startSyncTask("syncPeople")') start
+            tr
+              td activities for people
+              td sync activities for all people in domain
+              td
+                button.btn.btn-default(ng-click='startSyncTask("syncActivities")') start
+            tr
+              td documents
+              td update search indices for activities and profiles
+              td
+                button.btn.btn-default(ng-click='startSyncTask("updateSearchIndex")') start
+            tr
+              td expert areas
+              td tag activities and find experts
+              td
+                button.btn.btn-default(ng-click='startSyncTask("updateTags")') start
+            tr
+              td reports
+              td 
+                span update report
+                select(ng-model="d.currentReport",ng-options="x.name for x in d.well.reports.reports.items",style="width: 200px")
+              td
+                button.btn.btn-default(ng-click='startSyncTask("updateReport", {reportId: d.currentReport.id})') start
+      div.clearfix
+        button.btn.btn-danger.pull-right(ng-click='clearCompleted()', style="margin-bottom: 10px") clear completed
+      div.clearfix
+        button.btn.btn-warning.pull-right(ng-click='getRunningTasks()', style="margin-bottom: 10px") refresh
+        h5.pull-left(style="margin-right:10px") DELETE ALL
+        button.btn.btn-danger.pull-left(ng-click='deleteAll("reports")', style="margin-right: 10px") reports
+        button.btn.btn-danger.pull-left(ng-click='deleteAll("people")', style="margin-right: 10px") people
+        button.btn.btn-danger.pull-left(ng-click='deleteAll("users")', style="margin-right: 10px") users
+        button.btn.btn-danger.pull-left(ng-click='deleteAll("activities")', style="margin-right: 10px") activities
+        button.btn.btn-danger.pull-left(ng-click='deleteAll("tasks")', style="margin-right: 10px") tasks
+        button.btn.btn-danger.pull-left(ng-click='resetDomain()', style="margin-right: 10px") reset domain
+    loading(ng-show='loading')
+    #running-tasks.row
+      .col-lg-12
+        task(ng-repeat='t in d.runningTasks')

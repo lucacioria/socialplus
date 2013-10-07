@@ -1,0 +1,9 @@
+.row
+  .col-lg-6
+    div(google-chart="", onselect="onDaySelected", chart="d.chartRestrictedVsPublicByDay", style="{{d.chartRestrictedVsPublicByDay.cssStyle}}")
+  .col-lg-6
+    div(google-chart="", chart="d.chartActivePeopleByDay", style="{{d.chartActivePeopleByDay.cssStyle}}")
+.row
+  .col-lg-12
+    h4 Popular activities
+    div(activity-box="", ng-cloak="", activities="d.popularActivities.byDay")

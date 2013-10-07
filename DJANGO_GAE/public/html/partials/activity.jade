@@ -1,0 +1,28 @@
+div.row.panel
+	div.col-lg-3
+		div
+			img.img-thumbnail(src="{{a.actor.imageUrl}}", style="float:left")
+			div(style="float:left; margin-left: 15px")
+				a(href="#/person/details/{{a.actor.id}}") {{a.actor.displayName}}
+				br
+				span(style="color:#999999") {{a.provider}}
+				br
+				a(href="{{a.object.url}}", target="_blank", style="color: #999") [open in G+]
+	
+	div.col-lg-7
+		div
+			p(style="margin-bottom: 3px;")
+				span(style="color:#999") {{a.published | formatUTC}},
+				span(style="color:#aaa; margin-left: 5px;") {{a.published | formatUTCLong}}
+			p 
+				span.badge(ng-repeat="tag in a.tags", style="margin-right: 10px; opacity: .5") {{tag}}
+				span {{a.title | trim}}
+	div.col-lg-2
+		i(ng-show="a.access.domainRestricted", class="glyphicon glyphicon-lock pull-right", style="margin-left: 10px")
+		i(ng-show="a.verb=='share'", class="glyphicon glyphicon-share-alt pull-right", style="margin-left: 10px")
+		div.clear-fix
+			p.text-warning {{a.access.visibility}}
+			p.text-info(ng-show="a.access.communityName") {{a.access.communityName + " (" + a.access.communityCategory + ")"}}
+			p.text-success(ng-show="a.object.plusones>0") 
+				strong {{a.object.plusones}} 
+				| +1s

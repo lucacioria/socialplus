@@ -1,0 +1,12 @@
+div.row.panel(ng-class="{'panel-warning': !t.completed, 'panel-success': t.completed}")
+	.panel-heading
+		h4.pull-left {{t.name}}
+		h6.pull-right {{t.creationTime}}
+		div.clearfix
+	.panel-body
+		.progress(ng-show="t.progressPercentage < 100")
+			.progress-bar(role="progressbar", aria-valuemin="0", aria-valuemax="100", 
+				aria-valuenow="{{t.progressPercentage}}", style="width: {{t.progressPercentage}}%")
+		//- p {{t.progress_percentage}}
+	.panel-footer
+		pre {{t.progressMessage}}

@@ -1,0 +1,9 @@
+h3 {{d.personData.displayName}}
+a.pull-right.text-primary(href="https://plus.google.com/{{d.personData.id_}}/about", target="_blank") [view in G+]
+h5(style="color:#999") {{d.personData.user.primaryEmail}}
+.well
+	h4 expert areas
+	p(ng-repeat="tag in d.personData.expert_areas")
+		span {{tag.tag_name}}
+			span.badge(style="margin-left: 10px") {{tag.level}}
+div(activity-box="", search-string="{{d.personData.user.primaryEmail.length > 0 ? 'author:(' + d.personData.user.primaryEmail + ')' : ''}}")

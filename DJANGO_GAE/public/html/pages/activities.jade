@@ -1,0 +1,14 @@
+mixin tabentry(name, tabName)
+    li(ng-class="{active: $state.includes('activities.#{tabName}')}")
+        a(ui-sref="activities.#{tabName}") #{name}
+
+#activitiesPage(ng-init='initActivities()')
+  div
+    .page-header
+      h1 ACTIVITIES
+    #tabs.row(style="margin-bottom: 10px")
+      .col-lg-12
+        ul.nav.nav-tabs
+          mixin tabentry('simple search', 'simple')
+          mixin tabentry('advanced search', 'advanced')
+    div(ui-view="")

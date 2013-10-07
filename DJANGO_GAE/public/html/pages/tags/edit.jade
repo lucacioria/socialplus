@@ -1,0 +1,28 @@
+p {{tabName}}
+  #tags.row
+    .col-lg-12
+      button.btn.btn-warning.pull-right(ng-click='createTag()') new tag
+      table.table.table-striped.table-condensed.clear-fix
+        thead
+          tr
+            td 
+              b TAG NAME
+            td 
+              b TAG SEARCH STRINGS
+            td 
+              b ACTION
+        tbody
+          tr(ng-repeat="tag in d.tags")
+            td
+              input(ng-model="tag.name")
+            td
+              p(ng-repeat="s in tag.search_strings")
+                input(ng-model="s.value")
+                span(style="margin-left: 10px; cursor:pointer", ng-click='removeSearchString(tag, s)')
+                  span.glyphicon.glyphicon-trash
+              span(style="cursor:pointer", ng-click='tag.search_strings.push({vale: ""})')
+                  span.glyphicon.glyphicon-plus
+            td
+              button.btn.btn-default(ng-click='updateTag(tag)') save
+              button.btn.btn-default(ng-click='deleteTag(tag)') delete
+              button.btn.btn-primary(ng-click='findExperts(tag)') find experts

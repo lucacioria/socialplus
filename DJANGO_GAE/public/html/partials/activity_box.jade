@@ -1,0 +1,7 @@
+.activity-box
+	loading(ng-show='d.loading')
+	activity(ng-repeat='a in d.activities.items')
+	.pull-right(style="margin-bottom: 30px")
+		a(ng-click="getPreviousPage()", ng-show="d.page > 1") < previous
+		span(ng-show="d.page>1")  (page {{d.page}})
+		a(ng-click="getNextPage()", ng-show="d.activities.cursor != undefined && d.activities.cursor != 'null'") next >

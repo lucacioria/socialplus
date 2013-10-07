@@ -1,0 +1,14 @@
+mixin tabentry(name, tabName)
+    li(ng-class="{active: $state.includes('tags.#{tabName}')}")
+        a(ui-sref="tags.#{tabName}") #{name}
+
+#tagsPage(ng-init="initTags()")
+  .page-header
+    h1 TAGS
+  #tabs.row(style="margin-bottom:10px")
+    .col-lg-12
+      ul.nav.nav-tabs
+        mixin tabentry('edit tags', 'edit')
+        mixin tabentry('find experts', 'experts')
+  div
+    div(ui-view="")

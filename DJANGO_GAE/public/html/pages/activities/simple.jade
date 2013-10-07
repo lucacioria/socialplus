@@ -1,0 +1,12 @@
+p {{tabName}}
+#simple.row
+  .col-lg-12
+    .well
+      form.form-inline
+        fieldset
+          legend search for activities
+          input.form-control(type='text', ng-model='d.keywords', placeholder='keywords', style="width: 93%")
+          loading(ng-show='loading')
+  .row
+    .col-lg-12
+      div(activity-box="", search-string="{{d.keywords}}")

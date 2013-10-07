@@ -1,0 +1,9 @@
+.row
+  .col-lg-6
+    div(google-chart="", onselect="onMonthSelected", chart="d.chartRestrictedVsPublicByMonth", style="{{d.chartRestrictedVsPublicByMonth.cssStyle}}")
+  .col-lg-6
+    div(google-chart="", chart="d.chartActivePeopleByMonth", style="{{d.chartActivePeopleByMonth.cssStyle}}") 
+.row
+  .col-lg-12
+    h4 Popular activities
+    div(activity-box="", ng-cloak="", activities="d.popularActivities.byMonth")
