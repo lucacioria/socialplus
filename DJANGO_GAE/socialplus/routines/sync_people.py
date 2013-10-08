@@ -5,7 +5,7 @@ import logging
 
 from socialplus.utils import *
 
-from socialplus.api import create_plus_service, DOMAIN_NAME
+from socialplus.api import create_plus_service
 from socialplus.routines import update_progress, mark_as_completed
 from socialplus.data.people import User, save_person
 from socialplus.data.domain import Domain

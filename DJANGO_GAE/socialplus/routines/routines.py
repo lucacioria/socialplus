@@ -6,7 +6,7 @@ import pprint
 
 from socialplus.utils import *
 from socialplus.data import *
-from socialplus.api import create_plus_service, create_directory_service, DOMAIN_NAME
+from socialplus.api import create_plus_service, create_directory_service
 
 from google.appengine.api import search
 from google.appengine.ext import ndb
