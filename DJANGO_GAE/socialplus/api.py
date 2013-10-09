@@ -10,21 +10,29 @@ from apiclient.discovery import build
 from oauth2client.client import SignedJwtAssertionCredentials
 from oauth2client.client import AccessTokenRefreshError
 
-"""Email of the Service Account"""
-SERVICE_ACCOUNT_EMAIL = '111902125298@developer.gserviceaccount.com' # appseveryday
-# SERVICE_ACCOUNT_EMAIL = '109592818274@developer.gserviceaccount.com' # managemybudget
+API_ACCESS_DATA = {
+    "OXYLANE": {
+        "SERVICE_ACCOUNT_EMAIL": "794729463259@developer.gserviceaccount.com",
+        "ADMIN_EMAIL": "gplus.api@oxylane.com",
+        "SERVICE_ACCOUNT_PEM_FILE_PATH": "privatekey_oxylane.pem",
+        "DOMAIN_NAME": "oxylane.com",
+        "CUSTOMER_ID": "C045avkck"
+    },
+    "APPSEVERYDAY": {
+        "SERVICE_ACCOUNT_EMAIL": "111902125298@developer.gserviceaccount.com",
+        "ADMIN_EMAIL": "marcosignati@appseveryday.com",
+        "SERVICE_ACCOUNT_PEM_FILE_PATH": "privatekey_appseveryday.pem",
+        "DOMAIN_NAME": "appseveryday.com"
+    },
+    "MANAGEMYBUDGET": {
+        "SERVICE_ACCOUNT_EMAIL": "109592818274@developer.gserviceaccount.com",
+        "ADMIN_EMAIL": "socialplus@managemybudget.net",
+        "SERVICE_ACCOUNT_PEM_FILE_PATH": "privatekey_managemybudget.pem",
+        "DOMAIN_NAME": "managemybudget.net"
+    },
+}
 
-"""Path to the Service Account's Private Key file"""
-SERVICE_ACCOUNT_PEM_FILE_PATH = 'privatekey_appseveryday.pem'
-# SERVICE_ACCOUNT_PEM_FILE_PATH = 'privatekey_managemybudget.pem'
-
-"""Email of the Administrato Account (no user must use this account, app only)"""
-ADMIN_EMAIL = "marcosignati@appseveryday.com"
-# ADMIN_EMAIL = "socialplus@managemybudget.net"
-
-"""domain name"""
-DOMAIN_NAME = "appseveryday.com"
-# DOMAIN_NAME = "managemybudget.net"
+CURRENT_DOMAIN = "OXYLANE"
 
 current_plus_service = {"user_email" : "--", "service" : None}
 
@@ -35,7 +43,7 @@ def create_plus_service(user_email):
     else:
         print("NEW AUTHENTICATION NECESSARY: current email is " + current_plus_service["user_email"] + " and new email is " + user_email)
 
-    f = file(SERVICE_ACCOUNT_PEM_FILE_PATH, 'rb')
+    f = file(API_ACCESS_DATA[CURRENT_DOMAIN]["SERVICE_ACCOUNT_PEM_FILE_PATH"], 'rb')
     key = f.read()
     f.close()
 
@@ -45,7 +53,7 @@ def create_plus_service(user_email):
         http = cached_http
         logging.debug("CACHE HIT")
     else:
-        credentials = SignedJwtAssertionCredentials(SERVICE_ACCOUNT_EMAIL, key, scope=[
+        credentials = SignedJwtAssertionCredentials(API_ACCESS_DATA[CURRENT_DOMAIN]["SERVICE_ACCOUNT_EMAIL"], key, scope=[
             "https://www.googleapis.com/auth/plus.circles.read",
             "https://www.googleapis.com/auth/plus.circles.write",
             "https://www.googleapis.com/auth/plus.profiles.read",
@@ -65,15 +73,19 @@ def create_plus_service(user_email):
     return service
 
 def create_directory_service():
-    f = file(SERVICE_ACCOUNT_PEM_FILE_PATH, 'rb')
+    f = file(API_ACCESS_DATA[CURRENT_DOMAIN]["SERVICE_ACCOUNT_PEM_FILE_PATH"], 'rb')
     key = f.read()
     f.close()
 
-    credentials = SignedJwtAssertionCredentials(SERVICE_ACCOUNT_EMAIL, key, scope=[
+    credentials = SignedJwtAssertionCredentials(API_ACCESS_DATA[CURRENT_DOMAIN]["SERVICE_ACCOUNT_EMAIL"], key, scope=[
         "https://www.googleapis.com/auth/admin.directory.user.readonly",
+<<<<<<< HEAD
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
         "https://www.googleapis.com/auth/admin.directory.group.readonly",
     ], sub=ADMIN_EMAIL)
+=======
+    ], sub=API_ACCESS_DATA[CURRENT_DOMAIN]["ADMIN_EMAIL"])
+>>>>>>> 326f7b1304d7133998aede89624987e797671063
     http = httplib2.Http()
     http = credentials.authorize(http)
   

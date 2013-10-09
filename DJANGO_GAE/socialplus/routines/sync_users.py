@@ -3,7 +3,7 @@ import httplib2
 import json
 import logging
 
-from socialplus.api import create_directory_service, DOMAIN_NAME
+from socialplus.api import create_directory_service, CURRENT_DOMAIN, API_ACCESS_DATA
 from socialplus.routines import update_progress, mark_as_completed
 from socialplus.data.people import save_user
 from socialplus.data.domain import Domain
@@ -19,14 +19,14 @@ def sync_users(task):
     }
     update_progress(task, "\ncalling Directory API to update list of users..\n", 0, 100)
     update_progress(task, "starting update\n", 10, 100)
-    users_api = directory.users().list(domain=DOMAIN_NAME).execute()
+    users_api = directory.users().list(domain=API_ACCESS_DATA[CURRENT_DOMAIN]["DOMAIN_NAME"]).execute()
     while True:
         for user in users_api['users']:
             save_user(user)
             statistics["total_users"] += 1
         if 'nextPageToken' in users_api:
             update_progress(task, str(statistics["total_users"]) + " users updated\n", 30, 100)
-            users_api = directory.users().list(domain=DOMAIN_NAME, pageToken=users_api['nextPageToken']).execute()
+            users_api = directory.users().list(domain=API_ACCESS_DATA[CURRENT_DOMAIN]["DOMAIN_NAME"], pageToken=users_api['nextPageToken']).execute()
         else:
             break
     # update statistics in Domain entity
