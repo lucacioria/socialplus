@@ -15,7 +15,8 @@ API_ACCESS_DATA = {
         "SERVICE_ACCOUNT_EMAIL": "794729463259@developer.gserviceaccount.com",
         "ADMIN_EMAIL": "gplus.api@oxylane.com",
         "SERVICE_ACCOUNT_PEM_FILE_PATH": "privatekey_oxylane.pem",
-        "DOMAIN_NAME": "oxylane.com"
+        "DOMAIN_NAME": "oxylane.com",
+        "CUSTOMER_ID": "C045avkck"
     },
     "APPSEVERYDAY": {
         "SERVICE_ACCOUNT_EMAIL": "111902125298@developer.gserviceaccount.com",
