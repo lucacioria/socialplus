@@ -55,17 +55,17 @@ window.myApp.controller 'ReportsCtrl', ['$scope', '$http', 'App',  (scope, http,
 
 	cleanCharts = () ->
 		scope.d.chartActivePeopleEver.data.rows = []
-		scope.d.chartRestrictedVsPublicByDay.data.rows = []
-		scope.d.chartRestrictedVsPublicByMonth.data.rows = []
-		scope.d.chartRestrictedVsPublicByYear.data.rows = []
-		scope.d.chartRestrictedVsPublicEver.data.rows = []
+		scope.d.chartRestrictedCountByDay.data.rows = []
+		scope.d.chartRestrictedCountByMonth.data.rows = []
+		scope.d.chartRestrictedCountByYear.data.rows = []
+		scope.d.chartRestrictedCountEver.data.rows = []
 		scope.d.popularActivities.ever = []
 
 	populateCharts = () ->
 		cleanCharts()
-		scope.d.chartRestrictedVsPublicEver.data.rows = [
-			{c: [{v: "Public"},{v: scope.d.reportData.dataEver.restrictedVsPublic.public}]},
-			{c: [{v: "Restricted"}, {v: scope.d.reportData.dataEver.restrictedVsPublic.restricted}]}
+		scope.d.chartRestrictedCountEver.data.rows = [
+			{c: [{v: "Non Restricted"},{v: scope.d.reportData.dataEver.restrictedCount.nonRestricted}]},
+			{c: [{v: "Restricted"}, {v: scope.d.reportData.dataEver.restrictedCount.restricted}]}
 		]
 
 		for activePerson in scope.d.reportData.dataEver.activePeople
@@ -73,13 +73,13 @@ window.myApp.controller 'ReportsCtrl', ['$scope', '$http', 'App',  (scope, http,
 		scope.d.popularActivities.ever = (x.activity for x in scope.d.reportData.dataEver.popularActivities)
 
 		for day in scope.d.reportData.dataByDay
-			scope.d.chartRestrictedVsPublicByDay.data.rows.push {c: [{v: day.interval}, {v: day.restrictedVsPublic.restricted}, {v: day.restrictedVsPublic.public}]}
+			scope.d.chartRestrictedCountByDay.data.rows.push {c: [{v: day.interval}, {v: day.restrictedCount.restricted}, {v: day.restrictedCount.nonRestricted}]}
 
 		for month in scope.d.reportData.dataByMonth
-			scope.d.chartRestrictedVsPublicByMonth.data.rows.push {c: [{v: month.interval.substring(0,7)}, {v: month.restrictedVsPublic.restricted}, {v: month.restrictedVsPublic.public}]}
+			scope.d.chartRestrictedCountByMonth.data.rows.push {c: [{v: month.interval.substring(0,7)}, {v: month.restrictedCount.restricted}, {v: month.restrictedCount.nonRestricted}]}
 
 		for year in scope.d.reportData.dataByYear
-			scope.d.chartRestrictedVsPublicByYear.data.rows.push {c: [{v: year.interval.substring(0,4)}, {v: year.restrictedVsPublic.restricted}, {v: year.restrictedVsPublic.public}]}
+			scope.d.chartRestrictedCountByYear.data.rows.push {c: [{v: year.interval.substring(0,4)}, {v: year.restrictedCount.restricted}, {v: year.restrictedCount.nonRestricted}]}
 
 	scope.onActivePersonSelected = (selection) ->
 		console.log scope.d.reportData.dataEver.activePeople[selection[0].row].person.displayName
@@ -105,7 +105,7 @@ window.myApp.controller 'ReportsCtrl', ['$scope', '$http', 'App',  (scope, http,
 		scope.d.popularActivities.byYear = (x.activity for x in scope.d.reportData.dataByYear[selection[0].row].popularActivities)
 		scope.$digest()
 
-	scope.d.chartRestrictedVsPublicEver =
+	scope.d.chartRestrictedCountEver =
 		type: "PieChart"
 		displayed: true
 		cssStyle: "height:600px; width:600px;"
@@ -122,12 +122,12 @@ window.myApp.controller 'ReportsCtrl', ['$scope', '$http', 'App',  (scope, http,
 			rows: []
 
 		options:
-			title: "Public VS Restricted posts"
+			title: "Non Restricted VS Restricted posts"
 			isStacked: "true"
 			fill: 20
 			displayExactValues: true
 
-	scope.d.chartRestrictedVsPublicByDay =
+	scope.d.chartRestrictedCountByDay =
 		type: "ColumnChart"
 		displayed: true
 		cssStyle: "height:600px; width:600px;"
@@ -141,18 +141,18 @@ window.myApp.controller 'ReportsCtrl', ['$scope', '$http', 'App',  (scope, http,
 				label: "Restricted"
 				type: "number"
 			,
-				id: "public"
-				label: "Public"
+				id: "nonRestricted"
+				label: "Non Restricted"
 				type: "number"
 			]
 			rows: []
 
 		options:
-			title: "Public VS Restricted posts"
+			title: "Non Restricted VS Restricted posts"
 			isStacked: "true"
 			fill: 20
 
-	scope.d.chartRestrictedVsPublicByMonth =
+	scope.d.chartRestrictedCountByMonth =
 		type: "ColumnChart"
 		displayed: true
 		cssStyle: "height:600px; width:600px;"
@@ -166,18 +166,18 @@ window.myApp.controller 'ReportsCtrl', ['$scope', '$http', 'App',  (scope, http,
 				label: "Restricted"
 				type: "number"
 			,
-				id: "public"
-				label: "Public"
+				id: "nonRestricted"
+				label: "Non Restricted"
 				type: "number"
 			]
 			rows: []
 
 		options:
-			title: "Public VS Restricted posts"
+			title: "Non Restricted VS Restricted posts"
 			isStacked: "true"
 			fill: 20
 
-	scope.d.chartRestrictedVsPublicByYear =
+	scope.d.chartRestrictedCountByYear =
 		type: "ColumnChart"
 		displayed: true
 		cssStyle: "height:600px; width:600px;"
@@ -191,14 +191,14 @@ window.myApp.controller 'ReportsCtrl', ['$scope', '$http', 'App',  (scope, http,
 				label: "Restricted"
 				type: "number"
 			,
-				id: "public"
-				label: "Public"
+				id: "nonRestricted"
+				label: "Non Restricted"
 				type: "number"
 			]
 			rows: []
 
 		options:
-			title: "Public VS Restricted posts"
+			title: "Non Restricted VS Restricted posts"
 			isStacked: "true"
 			fill: 20
 
