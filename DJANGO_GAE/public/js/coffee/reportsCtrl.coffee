@@ -10,7 +10,7 @@ window.myApp.controller 'ReportsCtrl', ['$scope', '$http', 'App',  (scope, http,
 		byDay: []
 		byMonth: []
 		byYear: []
-	
+
 	scope.$watch 'd.currentReport', (newValue, oldValue) ->
 		app.state.go('reports.detail.ever', {reportName: newValue.id}) if newValue
 		getReport()
@@ -18,7 +18,7 @@ window.myApp.controller 'ReportsCtrl', ['$scope', '$http', 'App',  (scope, http,
 	scope.$watch 'd.well.reports.reports.items', (newValue, oldValue) ->
 		return if not scope.d.reportData
 		for r in newValue
-			if r.id == scope.d.reportData.id				
+			if r.id == scope.d.reportData.id
 				scope.d.currentReport = r
 
 	scope.deleteCurrentReport = () ->
@@ -68,18 +68,31 @@ window.myApp.controller 'ReportsCtrl', ['$scope', '$http', 'App',  (scope, http,
 			{c: [{v: "Restricted"}, {v: scope.d.reportData.dataEver.restrictedCount.restricted}]}
 		]
 
+		scope.d.chartVisibilityCountEver.data.rows = [
+			{c: [{v: "Shared Privately"},{v: scope.d.reportData.dataEver.visibilityCount.sharedPrivately}]},
+			{c: [{v: "Extended Circles"},{v: scope.d.reportData.dataEver.visibilityCount.extendedCircles}]},
+			{c: [{v: "Public"},{v: scope.d.reportData.dataEver.visibilityCount.public}]},
+			{c: [{v: "Private Community"},{v: scope.d.reportData.dataEver.visibilityCount.privateCommunity}]},
+			{c: [{v: "Public Community"},{v: scope.d.reportData.dataEver.visibilityCount.publicCommunity}]},
+			{c: [{v: "Restricted Community"},{v: scope.d.reportData.dataEver.visibilityCount.restrictedCommunity}]},
+			{c: [{v: "Domain"}, {v: scope.d.reportData.dataEver.restrictedCount.domain}]}
+		]
+
 		for activePerson in scope.d.reportData.dataEver.activePeople
 			scope.d.chartActivePeopleEver.data.rows.push {c: [{v: activePerson.person.displayName}, {v: activePerson.total}]}
 		scope.d.popularActivities.ever = (x.activity for x in scope.d.reportData.dataEver.popularActivities)
 
 		for day in scope.d.reportData.dataByDay
 			scope.d.chartRestrictedCountByDay.data.rows.push {c: [{v: day.interval}, {v: day.restrictedCount.restricted}, {v: day.restrictedCount.nonRestricted}]}
+			scope.d.chartVisibilityCountByDay.data.rows.push {c: [{v: day.interval}, {v: day.visibilityCount.sharedPrivately}, {v: day.visibilityCount.extendedCircles}, {v: day.visibilityCount.public}, {v: day.visibilityCount.domain}, {v: day.visibilityCount.privateCommunity}, {v: day.visibilityCount.publicCommunity}, {v: day.visibilityCount.restrictedCommunity}]}
 
 		for month in scope.d.reportData.dataByMonth
 			scope.d.chartRestrictedCountByMonth.data.rows.push {c: [{v: month.interval.substring(0,7)}, {v: month.restrictedCount.restricted}, {v: month.restrictedCount.nonRestricted}]}
+			scope.d.chartVisibilityCountByMonth.data.rows.push {c: [{v: month.interval}, {v: month.visibilityCount.sharedPrivately}, {v: month.visibilityCount.extendedCircles}, {v: month.visibilityCount.public}, {v: month.visibilityCount.domain}, {v: month.visibilityCount.privateCommunity}, {v: month.visibilityCount.publicCommunity}, {v: month.visibilityCount.restrictedCommunity}]}
 
 		for year in scope.d.reportData.dataByYear
 			scope.d.chartRestrictedCountByYear.data.rows.push {c: [{v: year.interval.substring(0,4)}, {v: year.restrictedCount.restricted}, {v: year.restrictedCount.nonRestricted}]}
+			scope.d.chartVisibilityCountByYear.data.rows.push {c: [{v: year.interval}, {v: year.visibilityCount.sharedPrivately}, {v: year.visibilityCount.extendedCircles}, {v: year.visibilityCount.public}, {v: year.visibilityCount.domain}, {v: year.visibilityCount.privateCommunity}, {v: year.visibilityCount.publicCommunity}, {v: year.visibilityCount.restrictedCommunity}]}
 
 	scope.onActivePersonSelected = (selection) ->
 		console.log scope.d.reportData.dataEver.activePeople[selection[0].row].person.displayName
@@ -202,6 +215,163 @@ window.myApp.controller 'ReportsCtrl', ['$scope', '$http', 'App',  (scope, http,
 			isStacked: "true"
 			fill: 20
 
+	scope.d.chartVisibilityCountEver =
+		type: "PieChart"
+		displayed: true
+		cssStyle: "height:600px; width:600px;"
+		data:
+			cols: [
+				id: "type"
+				label: "Type"
+				type: "string"
+			,
+				id: "quantity"
+				label: "Quantity"
+				type: "number"
+			]
+			rows: []
+
+		options:
+			title: "posts by visibility"
+			isStacked: "true"
+			fill: 20
+			displayExactValues: true
+
+	scope.d.chartVisibilityCountByDay =
+		type: "ColumnChart"
+		displayed: true
+		cssStyle: "height:600px; width:600px;"
+		data:
+			cols: [
+				id: "day"
+				label: "Day"
+				type: "string"
+			,
+				id: "sharedPrivatey"
+				label: "Shared Privately"
+				type: "number"
+			,
+				id: "extendedCircles"
+				label: "Extended Circles"
+				type: "number"
+			,
+				id: "public"
+				label: "Public"
+				type: "number"
+			,
+				id: "domain"
+				label: "Domain"
+				type: "number"
+			,
+				id: "privateCommunity"
+				label: "Private Community"
+				type: "number"
+			,
+				id: "puplicCommunity"
+				label: "Public Community"
+				type: "number"
+			,
+				id: "restrictedCommunity"
+				label: "Restricted Community"
+				type: "number"
+			]
+			rows: []
+
+		options:
+			title: "posts by visibility"
+			isStacked: "true"
+			fill: 20
+
+	scope.d.chartVisibilityCountByMonth =
+		type: "ColumnChart"
+		displayed: true
+		cssStyle: "height:600px; width:600px;"
+		data:
+			cols: [
+				id: "month"
+				label: "Month"
+				type: "string"
+			,
+				id: "sharedPrivatey"
+				label: "Shared Privately"
+				type: "number"
+			,
+				id: "extendedCircles"
+				label: "Extended Circles"
+				type: "number"
+			,
+				id: "public"
+				label: "Public"
+				type: "number"
+			,
+				id: "domain"
+				label: "Domain"
+				type: "number"
+			,
+				id: "privateCommunity"
+				label: "Private Community"
+				type: "number"
+			,
+				id: "puplicCommunity"
+				label: "Public Community"
+				type: "number"
+			,
+				id: "restrictedCommunity"
+				label: "Restricted Community"
+				type: "number"
+			]
+			rows: []
+
+		options:
+			title: "posts by visibility"
+			isStacked: "true"
+			fill: 20
+
+	scope.d.chartVisibilityCountByYear =
+		type: "ColumnChart"
+		displayed: true
+		cssStyle: "height:600px; width:600px;"
+		data:
+			cols: [
+				id: "year"
+				label: "Year"
+				type: "string"
+			,
+				id: "sharedPrivatey"
+				label: "Shared Privately"
+				type: "number"
+			,
+				id: "extendedCircles"
+				label: "Extended Circles"
+				type: "number"
+			,
+				id: "public"
+				label: "Public"
+				type: "number"
+			,
+				id: "domain"
+				label: "Domain"
+				type: "number"
+			,
+				id: "privateCommunity"
+				label: "Private Community"
+				type: "number"
+			,
+				id: "puplicCommunity"
+				label: "Public Community"
+				type: "number"
+			,
+				id: "restrictedCommunity"
+				label: "Restricted Community"
+				type: "number"
+			]
+			rows: []
+
+		options:
+			title: "posts by visibility"
+			isStacked: "true"
+			fill: 20
+
 	scope.d.chartActivePeopleEver =
 		type: "BarChart"
 		displayed: true
@@ -286,7 +456,7 @@ window.myApp.controller 'ReportsCtrl', ['$scope', '$http', 'App',  (scope, http,
 		isStacked: "true"
 		fill: 20
 
-	# initialize report if coming directly from details url 
+	# initialize report if coming directly from details url
 	if app.stateParams.reportName != undefined
 		getReport(app.stateParams.reportName)
 

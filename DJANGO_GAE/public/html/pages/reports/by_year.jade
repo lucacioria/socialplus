@@ -1,4 +1,7 @@
 .row
+  .col-lg-12
+    div(google-chart="", chart="d.chartVisibilityCountByYear", style="{{d.chartVisibilityCountByYear.cssStyle}}")
+.row
   .col-lg-6
     div(google-chart="", onselect="onYearSelected", chart="d.chartRestrictedCountByYear", style="{{d.chartRestrictedCountByYear.cssStyle}}")
   .col-lg-6

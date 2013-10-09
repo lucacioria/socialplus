@@ -1,4 +1,7 @@
 .row
+  .col-lg-12
+    div(google-chart="", chart="d.chartVisibilityCountByDay", style="{{d.chartVisibilityCountByDay.cssStyle}}")
+.row
   .col-lg-6
     div(google-chart="", onselect="onDaySelected", chart="d.chartRestrictedCountByDay", style="{{d.chartRestrictedCountByDay.cssStyle}}")
   .col-lg-6
