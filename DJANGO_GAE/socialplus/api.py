@@ -16,19 +16,32 @@ API_ACCESS_DATA = {
         "ADMIN_EMAIL": "gplus.api@oxylane.com",
         "SERVICE_ACCOUNT_PEM_FILE_PATH": "privatekey_oxylane.pem",
         "DOMAIN_NAME": "oxylane.com",
-        "CUSTOMER_ID": "C045avkck"
+        "CUSTOMER_ID": "C045avkck",
+        "DIRECTORY_SCOPES": [
+            "https://www.googleapis.com/auth/admin.directory.user.readonly"
+        ]
     },
     "APPSEVERYDAY": {
         "SERVICE_ACCOUNT_EMAIL": "111902125298@developer.gserviceaccount.com",
         "ADMIN_EMAIL": "marcosignati@appseveryday.com",
         "SERVICE_ACCOUNT_PEM_FILE_PATH": "privatekey_appseveryday.pem",
-        "DOMAIN_NAME": "appseveryday.com"
+        "DOMAIN_NAME": "appseveryday.com",
+        "DIRECTORY_SCOPES": [
+            "https://www.googleapis.com/auth/admin.directory.user.readonly",
+            "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
+            "https://www.googleapis.com/auth/admin.directory.group.readonly"
+        ]
     },
     "MANAGEMYBUDGET": {
         "SERVICE_ACCOUNT_EMAIL": "109592818274@developer.gserviceaccount.com",
         "ADMIN_EMAIL": "socialplus@managemybudget.net",
         "SERVICE_ACCOUNT_PEM_FILE_PATH": "privatekey_managemybudget.pem",
-        "DOMAIN_NAME": "managemybudget.net"
+        "DOMAIN_NAME": "managemybudget.net",
+        "DIRECTORY_SCOPES": [
+            "https://www.googleapis.com/auth/admin.directory.user.readonly",
+            "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
+            "https://www.googleapis.com/auth/admin.directory.group.readonly"
+        ]
     },
 }
 
@@ -58,7 +71,7 @@ def create_plus_service(user_email):
             "https://www.googleapis.com/auth/plus.circles.write",
             "https://www.googleapis.com/auth/plus.profiles.read",
             "https://www.googleapis.com/auth/plus.stream.read",
-            "https://www.googleapis.com/auth/plus.stream.write",
+            "https://www.googleapis.com/auth/plus.stream.write"
         ], sub=user_email)
         http = credentials.authorize(http)
         cache.set('plus_http_' + user_email, http, 30)
@@ -77,15 +90,8 @@ def create_directory_service():
     key = f.read()
     f.close()
 
-    credentials = SignedJwtAssertionCredentials(API_ACCESS_DATA[CURRENT_DOMAIN]["SERVICE_ACCOUNT_EMAIL"], key, scope=[
-        "https://www.googleapis.com/auth/admin.directory.user.readonly",
-<<<<<<< HEAD
-        "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
-        "https://www.googleapis.com/auth/admin.directory.group.readonly",
-    ], sub=ADMIN_EMAIL)
-=======
+    credentials = SignedJwtAssertionCredentials(API_ACCESS_DATA[CURRENT_DOMAIN]["SERVICE_ACCOUNT_EMAIL"], key, scope=DIRECTORY_SCOPES, sub=ADMIN_EMAIL)
     ], sub=API_ACCESS_DATA[CURRENT_DOMAIN]["ADMIN_EMAIL"])
->>>>>>> 326f7b1304d7133998aede89624987e797671063
     http = httplib2.Http()
     http = credentials.authorize(http)
   

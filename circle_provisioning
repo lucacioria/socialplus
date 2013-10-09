@@ -1,0 +1,68 @@
+### command line
+. .bashrc
+dev_appserver.py --datastore_path=../../datastore --port=7000 ./
+
+localhost:7000/public/html/main.html
+localhost:8000
+
+
+
+### business case
+- Drive usage of G+ in businesses
+- hypothesis: circles according to organizational structure will drive usage
+- scenario 1: map organizational structure as in GApps Domain on to G+ circles
+- scenario 2: allow for the creation of new circles for projects, new circles are then created for all members
+
+
+
+### implementation
+1. The organizational structure of an organization needs to be translated into circle objects and stored on datastore
+	- read organizational structure using Directory API
+		>> Organization Units https://developers.google.com/admin-sdk/directory/v1/reference/orgunits
+			--> unique identifier = name
+		>> Groups https://developers.google.com/admin-sdk/directory/v1/reference/groups/list
+			--> unique identifier = id, name, email
+	- map to circles:
+		>> organization units = circle containing all emails ids, for all email ids, name becomes circle name
+			# how to retrieve sub-organizations?
+			# do I need to check beforehand if an email is using G+?
+		>> groups = circle containing all emails ids, for all email ids, name becomes circle name
+
+2. Implement policy files/settings
+	# what policies are required in a typical SME?
+	# how could those policies be set in a convenient way?
+	# are there any properties in GApps account that policies could be deduced from?
+	
+==>> RESULT = complete representation of the organization in circle objects
+###
+3. All Users with G+ Accounts need to be seeded with circles according to the organisational structure
+	- translate each circle object into G+ circle, if not yet present
+	- else update
+
+4. The Circles of all G+ users in the account need to be kept in sync with what they are supposed to be (incremental approach for performance reasons)
+	--> circle mapping stored in Circles objects
+	>> in Circle object: store last background sync, last G+ sync
+	
+	1. update circle mapping using Domains API (background task)
+		# fast ways to check if a circle object is out of sync?
+			--> last updated, count of organization unit/group ???
+			
+	2. update actual circles of G+ profiles in the organization
+		# fast ways to check if a G+ circle is out of sync 
+	- incremental syncing
+		>> seed new G+ profiles
+		>> recreate deleted circles
+		>> insert deleted contacts into circles
+		>> ??? remove added contacts from circles (--> probably not!)
+	# differential file comparison algorithms??
+		-- difflib
+	
+5. Users who join G+ after Circles were seeded need to be added to the workflow
+	--> periodic background check on new/discontinued users
+	
+
+6. Create RESTful methods
+	- import resources into /views/__init__.py
+
+7. Integrate into frontend
+8. Set up test domain and run tests
