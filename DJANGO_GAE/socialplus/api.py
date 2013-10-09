@@ -71,6 +71,8 @@ def create_directory_service():
 
     credentials = SignedJwtAssertionCredentials(SERVICE_ACCOUNT_EMAIL, key, scope=[
         "https://www.googleapis.com/auth/admin.directory.user.readonly",
+        "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
+        "https://www.googleapis.com/auth/admin.directory.group.readonly",
     ], sub=ADMIN_EMAIL)
     http = httplib2.Http()
     http = credentials.authorize(http)
