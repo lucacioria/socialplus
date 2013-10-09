@@ -9,9 +9,34 @@ from socialplus.utils import *
 from socialplus.data.people import Person
 from socialplus.data.activities import Activity
 
-class RestrictedVsPublic(ndb.Model):
+class RestrictedCount(ndb.Model):
     restricted = ndb.IntegerProperty(default=0)
+    non_restricted = ndb.IntegerProperty(default=0)
+
+class VisibilityCount(ndb.Model):
+    shared_privately = ndb.IntegerProperty(default=0)
+    extended_circles = ndb.IntegerProperty(default=0)
     public = ndb.IntegerProperty(default=0)
+    domain = ndb.IntegerProperty(default=0)
+    private_community = ndb.IntegerProperty(default=0)
+    public_community = ndb.IntegerProperty(default=0)
+    restricted_community = ndb.IntegerProperty(default=0)
+
+    def increase_count_for_visibility(self, visibility):
+        if visibility == "shared privately":
+            self.shared_privately += 1
+        elif visibility == "extended circles":
+            self.extended_circles += 1
+        elif visibility == "public":
+            self.public += 1
+        elif visibility == "domain":
+            self.domain += 1
+        elif visibility == "private community":
+            self.private_community+= 1
+        elif visibility == "public community":
+            self.public_community += 1
+        elif visibility == "restricted community":
+            self.restricted_community += 1
 
 class ActivePerson(ndb.Model):
     person = ndb.KeyProperty(kind=Person)
@@ -26,7 +51,8 @@ class ReportData(ndb.Model):
     # time interval, meaning depends on container. ignored if in data_ever
     interval = ndb.DateProperty()
     # actual data
-    restricted_vs_public = ndb.LocalStructuredProperty(RestrictedVsPublic)
+    restricted_count = ndb.LocalStructuredProperty(RestrictedCount)
+    visibility_count = ndb.LocalStructuredProperty(VisibilityCount)
     active_people = ndb.LocalStructuredProperty(ActivePerson, repeated=True)
     popular_activities = ndb.LocalStructuredProperty(PopularActivity, repeated=True)
     total_number_of_activities = ndb.IntegerProperty(default=0)
@@ -34,17 +60,20 @@ class ReportData(ndb.Model):
     def __init__(self):
         # initialize new ReportData entity with nested entities
         super(ReportData, self).__init__()
-        self.restricted_vs_public = RestrictedVsPublic()
+        self.restricted_count = RestrictedCount()
+        self.visibility_count = VisibilityCount()
 
     def update_with_activity(self, a):
         rd = self
         # update total count
         rd.total_number_of_activities += 1
-        # update restricted vs public
+        # update restricted count
         if a.access.domain_restricted:
-            rd.restricted_vs_public.restricted += 1
+            rd.restricted_count.restricted += 1
         else:
-            rd.restricted_vs_public.public += 1
+            rd.restricted_count.non_restricted += 1
+        # update visibility count
+        rd.visibility_count.increase_count_for_visibility(a.access.visibility)
         # update most active user
         current_person_key = a.actor
         active_person_for_current = None
