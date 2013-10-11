@@ -4,28 +4,28 @@ import datetime
 
 from google.appengine.ext import ndb
 from google.appengine.api import search
+
+from socialplus.data import *
 from socialplus.utils import *
+from socialplus.api import * 
+
 
 class Circle(ndb.Model):
-    name                    = ndb.StringProperty()
-    emails_in_circle        = ndb.StringProperty()
-    emails_with_circle      = ndb.StringProperty()
-    last_domain_update   = ndb.DateTimeProperty()
-    last_gplus_update       = ndb.DateTimeProperty()
+    circle_id               = ndb.StringProperty(default="", required=True)
+    name                    = ndb.StringProperty(required=True)
+    in_circle               = ndb.KeyProperty(kind=CircleInput, repeated=True)
+    with_circle             = ndb.KeyProperty(kind=CircleInput, repeated=True)
+    enforce_exist           = ndb.BooleanProperty(default=True)
+    allow_add               = ndb.BooleanProperty(default=False)
+    allow_remove            = ndb.BooleanProperty(default=False)
+    last_gplus_update       = ndb.DateTimeProperty(auto_now=True)
     
-    def needs_domain_update(self):
-        # ...
+    def __init__(self, name, in_circle=[], with_circle=[]):
+        self.name = name
+        self.in_circle = in_circle
+        self.with_circle = with_circle
+        for person in self.with_circle.people:
+            CirclePerson.find_or_create(person.email)
     
-    def needs_gplus_update(self):
-        # ...
-        
-    def sync_with_domain(self):
-        # ...
-    
-    def sync_with_gplus(self):
-        # ...
-
-
-    def to_json(self):
-    	o = self.to_dict_with_id()
-    	return format_json(o)
+    def update(self):
+        # call create_or_update for each person in with_circle

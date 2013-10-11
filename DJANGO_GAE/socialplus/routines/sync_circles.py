@@ -5,33 +5,50 @@ import logging
 
 from socialplus.utils import *
 from socialplus.data import *
-from socialplus.api import create_directory_service
+from socialplus.api import * 
 
 from google.appengine.api import search
 from google.appengine.ext import ndb
 
-def seed_db_from_directory():
-    # create circle object from directory
-    #
-    # connect to directory api
-    # get all orgunits, subunits, groups
-    # translate them into respective circles objects
-    # --> then move on to seed_circles_from_db...
-    
-    directory = create_directory_service()
-    orgunits = directory.orgunits(type="all").list  ## need example on params, need response structure
-    groups = directory.groups().list
-    ## model hierarchy of orgunits
-    ## create Circles for orgunits, identical name or ID
-    ## [later: have policy file set rules for translations process]
-    
-    ## get all users
-    ## from user get: orgUnitPath, emails[]->primary:true
-    ## store email address in respective orgUnit = Circle
-    ## create the cirle object with respective email addresses
 
-    
-def seed_circles_from_db():
-    # create G+ circles from circle objects
-    # 
-    
+def sync_gapps():
+    sync_gapps_users()
+    sync_gapps_orgunits()
+    sync_gapps_groups()
+
+def sync_gapps_users():
+    directory = create_directory_service()
+    users = directory.users().list(domain=API_ACCESS_DATA[CURRENT_DOMAIN]["DOMAIN_NAME"], maxResults=500).execute()
+    while True:
+        for user in users["users"]:
+            CirclePerson.find_or_create(user["primaryEmail"], user["orgUnitPath"])
+        if users["nextPageToken"]:
+            users = directory.users().list(domain=API_ACCESS_DATA[CURRENT_DOMAIN]["DOMAIN_NAME"], maxResults=500, nextPageToken=users["nextPageToken"]).execute()
+        else:
+            break
+
+def sync_gapps_orgunits():
+    directory = create_directory_service()
+    orgunits = directory.orgunits().list(customerId=API_ACCESS_DATA[CURRENT_DOMAIN]["CUSTOMER_ID"], type="all").execute()
+    for orgunit in orgunits["organizationUnits"]:
+        ou = OrgUnit.new(orgunit["name"])
+        users = CirclePerson.query(CirclePerson.orgUnitPath=orgunit["orgUnitPath"])
+        ou.people = ndb.put_multi_async([x in users])  # is this equivalent to [x.key for x in users] ?
+
+def sync_gapps_groups():
+    directory = create_directory_service()
+    groups = directory.groups().list(customerId=API_ACCESS_DATA[CURRENT_DOMAIN]["CUSTOMER_ID"]).execute()
+    for group in groups["groups"]:
+        g = Group.new(name=group["name"], groupEmail=group["email"])
+        members = directory.members().list(group["email"], maxResults=1000).execute()
+        people = []
+        while True:
+            # process members
+            for member in members["members"]:
+                people.append(CirclePerson.find_or_create(member["email"]))
+            if members["pageToken"]:
+                members = directory.members().list(group["email"], maxResults=1000, pageToken=members["pageToken"]).execute()
+            else:
+                break
+        g.people = ndb.put_multi_async([x in people])
+

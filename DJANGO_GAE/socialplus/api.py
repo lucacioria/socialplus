@@ -26,6 +26,7 @@ API_ACCESS_DATA = {
         "ADMIN_EMAIL": "marcosignati@appseveryday.com",
         "SERVICE_ACCOUNT_PEM_FILE_PATH": "privatekey_appseveryday.pem",
         "DOMAIN_NAME": "appseveryday.com",
+        "CUSTOMER_ID": "",
         "DIRECTORY_SCOPES": [
             "https://www.googleapis.com/auth/admin.directory.user.readonly",
             "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
@@ -37,12 +38,25 @@ API_ACCESS_DATA = {
         "ADMIN_EMAIL": "socialplus@managemybudget.net",
         "SERVICE_ACCOUNT_PEM_FILE_PATH": "privatekey_managemybudget.pem",
         "DOMAIN_NAME": "managemybudget.net",
+        "CUSTOMER_ID": "",
         "DIRECTORY_SCOPES": [
             "https://www.googleapis.com/auth/admin.directory.user.readonly",
             "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
             "https://www.googleapis.com/auth/admin.directory.group.readonly"
         ]
     },
+    "INNOVATIVE_ENTERPRISE": {
+        "SERVICE_ACCOUNT_EMAIL": "",
+        "ADMIN_EMAIL": "fried@innovative-enterprise.org",
+        "SERVICE_ACCOUNT_PEM_FILE_PATH": "",
+        "DOMAIN_NAME": "innovative-enterprise.org",
+        "CUSTOMER_ID": "",
+        "DIRECTORY_SCOPES": [
+            "https://www.googleapis.com/auth/admin.directory.user.readonly",
+            "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
+            "https://www.googleapis.com/auth/admin.directory.group.readonly"
+        ]
+    }
 }
 
 CURRENT_DOMAIN = "OXYLANE"
@@ -90,8 +104,7 @@ def create_directory_service():
     key = f.read()
     f.close()
 
-    credentials = SignedJwtAssertionCredentials(API_ACCESS_DATA[CURRENT_DOMAIN]["SERVICE_ACCOUNT_EMAIL"], key, scope=DIRECTORY_SCOPES, sub=ADMIN_EMAIL)
-    ], sub=API_ACCESS_DATA[CURRENT_DOMAIN]["ADMIN_EMAIL"])
+    credentials = SignedJwtAssertionCredentials(API_ACCESS_DATA[CURRENT_DOMAIN]["SERVICE_ACCOUNT_EMAIL"], key, scope=API_ACCESS_DATA[CURRENT_DOMAIN]["DIRECTORY_SCOPES"], sub=API_ACCESS_DATA[CURRENT_DOMAIN]["ADMIN_EMAIL"])
     http = httplib2.Http()
     http = credentials.authorize(http)
   
