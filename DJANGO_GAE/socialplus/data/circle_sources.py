@@ -12,7 +12,12 @@ from google.appengine.ext.ndb import polymodel
 
 
 class CircleInput(polymodel.PolyModel):
-    # abstract base class
+    has_changed         = ndb.BooleanProperty(default=False)
+    last_update         = ndb.DateTimeProperty(auto_now=True)
+    
+    def set_updated(self):
+        self.has_changed = False
+        return self.put()
     
 class CircleID(ndb.Model):
     circle_id           = ndb.StringProperty(default="", required=True)
@@ -21,21 +26,59 @@ class CircleID(ndb.Model):
 class OrgUnit(CircleInput):
     name                = ndb.StringProperty(required=True)
     orgUnitPath         = ndb.StringProperty(required=True)
-    has_changed         = ndb.BooleanProperty(default=False)
     people              = ndb.KeyProperty(kind=CirclePerson, repeated=True)
-    last_update         = ndb.DateTimeProperty(auto_now=True)
     
-    def __init__(self, name):
-        self.name       = name      
+    @classmethod
+    def find_or_create(cls, name, orgUnitPath):
+        obj         = cls.query(cls.name==name)
+        if obj is None:
+            obj     = cls.new(name=name, orgUnitPath=orgUnitPath)
+        return obj
+    
+    def update_from_source(self):
+        if not self.people:        
+            users = CirclePerson.query(CirclePerson.orgUnitPath=orgunit["orgUnitPath"])
+            self.people = ndb.put_multi_async([x in users])  # is this equivalent to [x.key for x in users] ?
+        else:
+            self.set_updated()
+            directory = create_directory_service()
+            
+            # we assume Person Sync has run previously
+            # check diff between matching (orgUnitPath) CirclePerson object
+            # update self.people list of Keys accordingly (add/remove)
+            # if anything changed set has_changed = True
+            
+            # if changed, update set needs_update=true for Circles that contain self
+            # --> Circle.query( in_circles or with_circles )
         
     
 class Group(CircleInput):
     name                = ndb.StringProperty(required=True)
     group_email         = ndb.StringProperty(required=True)
-    has_changed         = ndb.BooleanProperty(default=False)
     people              = ndb.KeyProperty(kind=CirclePerson, repeated=True)
-    last_update         = ndb.DateTimeProperty(auto_now=True)
     
+    @classmethod
+    def find_or_create(cls, name, group_email):
+        obj         = cls.query(cls.name==name)
+        if obj is None:
+            obj     = cls.new(name=name, group_email=group_email)
+        return obj
+    
+    def update_from_source(self):
+        if not self.people:
+            members = directory.members().list(group["email"], maxResults=1000).execute()
+            people = []
+            while True:
+                for member in members["members"]:
+                    people.append(CirclePerson.find_or_create(member["email"]))
+                if members["pageToken"]:
+                    members = directory.members().list(group["email"], maxResults=1000, pageToken=members["pageToken"]).execute()
+                else:
+                    break
+            self.people = ndb.put_multi_async([x in people])
+        else:
+            self.set_updated()
+            # UPDATE
     
     
 class CirclePerson(CircleInput):
@@ -44,7 +87,6 @@ class CirclePerson(CircleInput):
     gplus_id            = ndb.StringProperty()
     circles             = ndb.StructuredProperty(CircleID, repeated=True)
     orgUnitPath         = ndb.StringProperty()
-    last_update         = ndb.DateTimeProperty(auto_now=True)
     
     def __init__(self, email, orgUnitPath=None):
         self.email          = email
@@ -53,7 +95,7 @@ class CirclePerson(CircleInput):
     
     @classmethod
     def find_or_create(cls, email, orgUnitPath=None):
-        obj         = cls.query(CirclePerson.email==email)
+        obj         = cls.query(cls.email==email)
         if obj is None:
             obj     = cls.new(email, orgUnitPath)
         return obj
@@ -72,9 +114,8 @@ class CirclePerson(CircleInput):
                 print e
     
     def update_circles(self):
-        # for each circle object in circles:
-        # check if user has that circle (check circleId)
-        # create the circle or update the circle
+        # first: update all circles (add/remove), if in_circle has changed
+        # then: update who has the circle (add/remove), if with_circle has changed
         
     
     
