@@ -6,7 +6,6 @@ from google.appengine.ext import ndb
 
 from socialplus.utils import *
 from socialplus.data.tags import Tag
-from socialplus.data.domain import Domain
 
 class User(ndb.Model):
     full_name        = ndb.StringProperty()
