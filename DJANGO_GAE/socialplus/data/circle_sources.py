@@ -40,8 +40,15 @@ class OrgUnit(CircleInput):
             users = CirclePerson.query(CirclePerson.orgUnitPath=orgunit["orgUnitPath"])
             self.people = ndb.put_multi_async([x in users])  # is this equivalent to [x.key for x in users] ?
         else:
+            # reset updated prior to update
             self.set_updated()
+            # check if orgUnit still exists
             directory = create_directory_service()
+            exist = directory.orgunits().get(customerId=API_ACCESS_DATA[CURRENT_DOMAIN]["CUSTOMER_ID"], orgUnitPath=self.orgUnitPath).execute()
+            if not exist: return self.key.delete()
+            # it still exists, update the people in it
+            
+            
             
             # we assume Person Sync has run previously
             # check diff between matching (orgUnitPath) CirclePerson object
@@ -85,7 +92,7 @@ class CirclePerson(CircleInput):
     email               = ndb.StringProperty(required=True)
     has_gplus           = ndb.BooleanProperty(default=False)
     gplus_id            = ndb.StringProperty()
-    circles             = ndb.StructuredProperty(CircleID, repeated=True)
+    circles             = ndb.StructuredProperty(CircleID, repeated=True) # CirclePerson needs to know about its Circles (CircleID) in order to update them
     orgUnitPath         = ndb.StringProperty()
     
     def __init__(self, email, orgUnitPath=None):
@@ -113,7 +120,17 @@ class CirclePerson(CircleInput):
             except Exception as e:
                 print e
     
-    def update_circles(self):
+    def create_circle(self, circle):
+        plus            = create_plus_service(self.email)
+        circle          = plus.circles().insert(userId="me", body={'displayName': circle.name}).execute()
+        circle_id       = circle.get('id')
+        self.circles.append(CircleID.new(circle_id=circle_id, circle=circle.key))
+        for source in circle.in_circle:
+            for pin in source.people():
+                result = plus.circles().addPeople(circleId=circle_id, email=pin.email).execute()
+        
+    
+    def update_circle(self, circle):
         # first: update all circles (add/remove), if in_circle has changed
         # then: update who has the circle (add/remove), if with_circle has changed
         

@@ -59,7 +59,7 @@ API_ACCESS_DATA = {
     }
 }
 
-CURRENT_DOMAIN = "OXYLANE"
+CURRENT_DOMAIN = "APPSEVERYDAY"
 
 current_plus_service = {"user_email" : "--", "service" : None}
 

@@ -24,7 +24,7 @@ class Circle(ndb.Model):
         self.name = name
         self.in_circle = in_circle
         self.with_circle = with_circle
-        self.update()
+        self.update(True)
     
     def needs_update(self):
         for s in in_circle:
@@ -37,15 +37,27 @@ class Circle(ndb.Model):
     
     # UPDATES G+ CIRCLES
     # (domain sync is a background task: sync_circles::sync_gapps)
-    def update(self):
-        # check_domain updates: call update on all in_circle and with_circle
-        # only update if circle needs_update==true
+    def update(self, is_init=False):
+        if is_init:
+            # create Circles
+            for p in with_circle:
+                p.create_circle(self)
+        elif self.needs_update():
+            # UPDATE
+
+        # UPDATE OR CREATE+LINK CIRCLES:
+        # for each in with_circle:
+        # check if circle is linked, if not create it and link it with Key and CircleID
+        # also check if it needs to be removed/unlinked from anyone
+        # then Step 2 = update the circle according to in_circle
+        
+        # check if the circle needs to be updated (self.needs_update)
+        # return if false, continue if true
+        # circle needs update = update existing circles, add/remove for deleted/new people
+        
         # call update for each person in with_person
         # arg = self.key --> so person update knows which circle to update on g+
         # set to false after update
-        for source in self.with_circle:
-            # for each source.people, call this
-            # update this circle for them
             
             
             
