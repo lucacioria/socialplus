@@ -18,7 +18,8 @@ API_ACCESS_DATA = {
         "DOMAIN_NAME": "oxylane.com",
         "CUSTOMER_ID": "C045avkck",
         "DIRECTORY_SCOPES": [
-            "https://www.googleapis.com/auth/admin.directory.user.readonly"
+            "https://www.googleapis.com/auth/admin.directory.user.readonly",
+            "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
         ]
     },
     "APPSEVERYDAY": {
@@ -26,7 +27,7 @@ API_ACCESS_DATA = {
         "ADMIN_EMAIL": "marcosignati@appseveryday.com",
         "SERVICE_ACCOUNT_PEM_FILE_PATH": "privatekey_appseveryday.pem",
         "DOMAIN_NAME": "appseveryday.com",
-        "CUSTOMER_ID": "",
+        "CUSTOMER_ID": "C035leaak",
         "DIRECTORY_SCOPES": [
             "https://www.googleapis.com/auth/admin.directory.user.readonly",
             "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
@@ -59,7 +60,7 @@ API_ACCESS_DATA = {
     }
 }
 
-CURRENT_DOMAIN = "OXYLANE"
+CURRENT_DOMAIN = "APPSEVERYDAY"
 
 current_plus_service = {"user_email" : "--", "service" : None}
 
