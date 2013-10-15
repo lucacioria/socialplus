@@ -39,7 +39,10 @@ def sync_people(task):
     update_progress(task, "\nstarting update of all Domain users G+ profiles..\n", 0, 100)
     n = 0
     while True:
-        q = User.query().fetch(limit=batch_size, offset=n*batch_size)
+        if task.sync_people_org_unit_path != None and len(task.sync_people_org_unit_path) > 0:
+            q = User.query(User.org_unit_path==task.sync_people_org_unit_path).fetch(limit=batch_size, offset=n*batch_size)
+        else:
+            q = User.query().fetch(limit=batch_size, offset=n*batch_size)
         for user in q:
             statistics["total_users"] += 1
             person_statistics = _sync_person_profile(user)
