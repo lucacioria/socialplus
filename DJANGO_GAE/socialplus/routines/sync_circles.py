@@ -13,7 +13,7 @@ from google.appengine.api import search
 from google.appengine.ext import ndb
 
 
-# BACKGROUND DOMAIN SYNC (run this using a scheduler)
+# BACKGROUND DOMAIN SYNC (run this using a scheduler, e.g. 1/day)
 def sync_gapps():
     sync_gapps_users()
     sync_gapps_orgunits()
@@ -24,12 +24,14 @@ def sync_gapps_users():
     users = directory.users().list(domain=API_ACCESS_DATA[CURRENT_DOMAIN]["DOMAIN_NAME"], maxResults=500).execute()
     while True:
         for user in users["users"]:
+            if "deletionTime" in user:
+                CirclePerson.find_and_delete(user["primaryEmail"])
+                continue
             CirclePerson.find_or_create(user["primaryEmail"], user["orgUnitPath"])
         if "nextPageToken" in users:
             users = directory.users().list(domain=API_ACCESS_DATA[CURRENT_DOMAIN]["DOMAIN_NAME"], maxResults=500, nextPageToken=users["nextPageToken"]).execute()
         else:
             break
-    # UPDATE: remove deleted users and add new users
 
 def sync_gapps_orgunits():
     directory = create_directory_service()
@@ -49,6 +51,6 @@ def sync_gapps_groups():
 
 def create_circles_test():
     # simple test: create circles from all orgunits and groups
-    Circle.new()
     # propagate to g+ circles by calling Circle.update
+    pass
 

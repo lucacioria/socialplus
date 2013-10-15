@@ -44,6 +44,15 @@ class CirclePerson(CircleInput):
         print("creating entity")
         return (ent, True)
     
+    @classmethod
+    def find_and_delete(cls, email):
+        q = cls.query(cls.email==email)
+        ent = q.get()
+        if ent is None:
+            return False
+        ent.key.delete()
+        return True
+    
     def people(self):
         return self
     

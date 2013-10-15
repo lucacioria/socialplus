@@ -29,8 +29,8 @@ class Circle(ndb.Model):
     
     @classmethod
     def get_by_name(cls, name):
-        return cls.query(cls.name==name).get()
-        # todo = try-catch
+        q = cls.query(cls.name==name)
+        return q.get()
     
     def needs_update(self):
         for s in in_circle:
