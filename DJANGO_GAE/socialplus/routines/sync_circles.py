@@ -36,10 +36,19 @@ def sync_gapps_users():
 def sync_gapps_orgunits():
     directory = create_directory_service()
     orgunits = directory.orgunits().list(customerId=API_ACCESS_DATA[CURRENT_DOMAIN]["CUSTOMER_ID"], type="all").execute()
+    domain_orgunits = []
     for orgunit in orgunits["organizationUnits"]:
         ou = OrgUnit.find_or_create(name=orgunit["name"], orgUnitPath=orgunit["orgUnitPath"])[0]
+        domain_orgunits.append(orgunit["name"])
         ou.update_from_source()
-            
+    stored_orgunits = OrgUnits.get_list()
+    # @TODO: is there a more efficient way to subtract to lists?
+    if len(domain_orgunits)!=len(stored_orgunits): # @TODO: test this stuff
+        for a in domain_orgunits:
+            if a in stored_orgunits:
+                domain_orgunits.remove(a)
+    for name in domain_orgunits:
+        find_and_delete(name)
 
 def sync_gapps_groups():
     directory = create_directory_service()
@@ -48,9 +57,12 @@ def sync_gapps_groups():
         pprint(group)
         g = Group.find_or_create(name=group["name"], group_email=group["email"])[0]
         g.update_from_source()
+    # @TODO: single out and handle deleted Groups
 
 def create_circles_test():
-    # simple test: create circles from all orgunits and groups
+    # simple test:
+    # sync domain
+    # create circles from all orgunits and groups
     # propagate to g+ circles by calling Circle.update
     pass
 

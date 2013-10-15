@@ -29,7 +29,8 @@ class CirclePerson(CircleInput):
     email               = ndb.StringProperty(required=True)
     has_gplus           = ndb.BooleanProperty(default=False)
     gplus_id            = ndb.StringProperty()
-    circles             = ndb.StructuredProperty(CircleID, repeated=True) # CirclePerson needs to know about its Circles (CircleID) in order to update them
+    circles             = ndb.StructuredProperty(CircleID, repeated=True)
+    people_count        = ndb.ComputedProperty(lambda e: len(e.circles))
     orgUnitPath         = ndb.StringProperty()
     
     @classmethod
@@ -94,6 +95,7 @@ class OrgUnit(CircleInput):
     name                = ndb.StringProperty(required=True)
     orgUnitPath         = ndb.StringProperty(required=True)
     people              = ndb.KeyProperty(kind=CirclePerson, repeated=True)
+    people_count        = ndb.ComputedProperty(lambda e: len(e.people))
     
     @classmethod
     def find_or_create(cls, name, orgUnitPath):
@@ -105,11 +107,26 @@ class OrgUnit(CircleInput):
         ent.put()
         return (ent, True)
     
+    # move these into a base class ...
+    @classmethod
+    def get_list(cls):
+        return [ou.name for ou in cls.query().fetch(9999)]
+    
+    @classmethod
+    def find_and_delete(cls, name):
+        q = cls.query(cls.name==name)
+        ent = q.get()
+        if ent is None:
+            return False
+        ent.key.delete()
+        return True
+    
     def update_from_source(self):
         if not self.people:
             users = CirclePerson.query(CirclePerson.orgUnitPath == self.orgUnitPath).fetch(9999)
             self.people = [x.key for x in users]
         else:
+            # THIS updates self.people (NOT existence of orgUnit)
             self.set_updated()
             # check if orgUnit still exists
             directory = create_directory_service()
@@ -164,5 +181,6 @@ class Group(CircleInput):
             self.people = people_keys
             self.put()
         else:
+            # THIS updates self.people (NOT existence of Group)
             self.set_updated()
             # UPDATE
