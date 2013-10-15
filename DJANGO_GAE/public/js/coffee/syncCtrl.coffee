@@ -5,6 +5,7 @@ window.myApp.controller 'SyncCtrl', ['$scope', '$http', 'App', (scope, http, app
 	scope.d.well = app.well
 	scope.d.runningTasks = []
 	scope.d.currentReport = null
+	scope.d.orgUnit = ""
 
 	scope.initTaskRefresh = () ->
 		scope.getRunningTasks()
