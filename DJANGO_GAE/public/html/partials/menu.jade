@@ -9,7 +9,6 @@ mixin entry(name, state)
         mixin entry('profile', 'person')
         mixin entry('reports', 'reports')
         mixin entry('tags', 'tags.experts')
-        mixin entry('circles', 'circles')
 
     .alert.alert-success(style="position:fixed; top: 10px; right: 10px; z-index: 99", ng-show="well.alerts.successMessage && well.alerts.successMessage != ''") {{well.alerts.successMessage}}
     .alert.alert-danger(style="position:fixed; top: 10px; right: 10px; z-index: 99", ng-show="well.alerts.errorMessage && well.alerts.errorMessage != ''") {{well.alerts.errorMessage}}
