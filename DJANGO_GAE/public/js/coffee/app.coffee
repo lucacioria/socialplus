@@ -39,10 +39,6 @@ window.myApp.config ['$httpProvider', '$stateProvider', '$urlRouterProvider',
 			url: "/sync"
 			templateUrl: "pages/sync.html"
 
-		.state "circles",
-			url: "/circles"
-			templateUrl: "pages/circles.html"
-		
 		.state "reports",
 			url: "/reports"
 			templateUrl: "pages/reports.html"
