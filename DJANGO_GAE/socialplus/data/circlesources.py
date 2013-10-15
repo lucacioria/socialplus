@@ -1,6 +1,8 @@
 import logging
 import json
 import datetime
+from pprint import pprint
+
 
 from socialplus.utils import *
 from socialplus.data import *
@@ -21,7 +23,56 @@ class CircleInput(polymodel.PolyModel):
     
 class CircleID(ndb.Model):
     circle_id           = ndb.StringProperty(default="", required=True)
-    circle              = ndb.KeyProperty(kind=Circle)
+    circle_name         = ndb.StringProperty(required=True)
+
+class CirclePerson(CircleInput):
+    email               = ndb.StringProperty(required=True)
+    has_gplus           = ndb.BooleanProperty(default=False)
+    gplus_id            = ndb.StringProperty()
+    circles             = ndb.StructuredProperty(CircleID, repeated=True) # CirclePerson needs to know about its Circles (CircleID) in order to update them
+    orgUnitPath         = ndb.StringProperty()
+    
+    def __init__(self, email, orgUnitPath=None):
+        self.email          = email
+        self.orgUnitPath    = orgUnitPath
+        self.check_has_gplus()
+    
+    @classmethod
+    def find_or_create(cls, email, orgUnitPath=None):
+        q           = cls.query(cls.email==email)
+        obj         = q.get()
+        if obj is None: obj = cls(email=email, orgUnitPath=orgUnitPath)
+        return obj
+    
+    def people(self):
+        return self
+    
+    def check_has_gplus(self):
+        if not has_gplus:
+            try:
+                plus            = create_plus_service(self.email)
+                results         = plus.people().search(maxResults=10, query=self.email).execute()
+                self.has_gplus  = results["items"].count==1
+            except Exception as e:
+                print e
+    
+    def create_circle(self, circle):
+        plus            = create_plus_service(self.email)
+        circle          = plus.circles().insert(userId="me", body={'displayName': circle.name}).execute()
+        circle_id       = circle.get('id')
+        self.circles.append(CircleID.new(circle_id=circle_id, circle_name=circle.name))
+        for source in circle.in_circle:
+            for pin in source.people():
+                result = plus.circles().addPeople(circleId=circle_id, email=pin.email).execute()
+
+
+    def update_circle(self, circle):
+        # first: update all circles (add/remove), if in_circle has changed
+        # then: update who has the circle (add/remove), if with_circle has changed
+        pass
+
+
+
 
 class OrgUnit(CircleInput):
     name                = ndb.StringProperty(required=True)
@@ -37,7 +88,7 @@ class OrgUnit(CircleInput):
     
     def update_from_source(self):
         if not self.people:        
-            users = CirclePerson.query(CirclePerson.orgUnitPath=orgunit["orgUnitPath"])
+            users = CirclePerson.query(CirclePerson.orgUnitPath == orgunit["orgUnitPath"])
             self.people = ndb.put_multi_async([x in users])  # is this equivalent to [x.key for x in users] ?
         else:
             # reset updated prior to update
@@ -86,60 +137,3 @@ class Group(CircleInput):
         else:
             self.set_updated()
             # UPDATE
-    
-    
-class CirclePerson(CircleInput):
-    email               = ndb.StringProperty(required=True)
-    has_gplus           = ndb.BooleanProperty(default=False)
-    gplus_id            = ndb.StringProperty()
-    circles             = ndb.StructuredProperty(CircleID, repeated=True) # CirclePerson needs to know about its Circles (CircleID) in order to update them
-    orgUnitPath         = ndb.StringProperty()
-    
-    def __init__(self, email, orgUnitPath=None):
-        self.email          = email
-        self.orgUnitPath    = orgUnitPath
-        self.check_has_gplus()
-    
-    @classmethod
-    def find_or_create(cls, email, orgUnitPath=None):
-        obj         = cls.query(cls.email==email)
-        if obj is None:
-            obj     = cls.new(email, orgUnitPath)
-        return obj
-    
-    def people(self):
-        return self
-            
-    
-    def check_has_gplus(self):
-        if not has_gplus:
-            try:
-                plus            = create_plus_service(self.email)
-                results         = plus.people().search(maxResults=10, query=self.email).execute()
-                self.has_gplus  = results["items"].count==1
-            except Exception as e:
-                print e
-    
-    def create_circle(self, circle):
-        plus            = create_plus_service(self.email)
-        circle          = plus.circles().insert(userId="me", body={'displayName': circle.name}).execute()
-        circle_id       = circle.get('id')
-        self.circles.append(CircleID.new(circle_id=circle_id, circle=circle.key))
-        for source in circle.in_circle:
-            for pin in source.people():
-                result = plus.circles().addPeople(circleId=circle_id, email=pin.email).execute()
-        
-    
-    def update_circle(self, circle):
-        # first: update all circles (add/remove), if in_circle has changed
-        # then: update who has the circle (add/remove), if with_circle has changed
-        
-    
-    
-    
-    
-    
-    
-    
-    
-    

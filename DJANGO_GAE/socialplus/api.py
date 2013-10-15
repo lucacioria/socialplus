@@ -29,7 +29,9 @@ API_ACCESS_DATA = {
         "DOMAIN_NAME": "appseveryday.com",
         "CUSTOMER_ID": "C035leaak",
         "DIRECTORY_SCOPES": [
-            "https://www.googleapis.com/auth/admin.directory.user.readonly"
+            "https://www.googleapis.com/auth/admin.directory.user.readonly",
+            "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
+            "https://www.googleapis.com/auth/admin.directory.group.readonly"
         ]
     },
     "MANAGEMYBUDGET": {

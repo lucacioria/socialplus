@@ -5,6 +5,8 @@ import logging
 
 from socialplus.utils import *
 from socialplus.data import *
+from socialplus.data.circlesources import *
+from socialplus.data.circles import *
 from socialplus.api import * 
 
 from google.appengine.api import search

@@ -6,12 +6,13 @@ from google.appengine.ext import ndb
 from google.appengine.api import search
 
 from socialplus.data import *
+from socialplus.data.circlesources import *
 from socialplus.utils import *
 from socialplus.api import * 
 
 
 class Circle(ndb.Model):
-    name                    = ndb.StringProperty(required=True)
+    name                    = ndb.StringProperty(required=True) # needs to be unique
     in_circle               = ndb.KeyProperty(kind=CircleInput, repeated=True)
     with_circle             = ndb.KeyProperty(kind=CircleInput, repeated=True)
     enforce_exist           = ndb.BooleanProperty(default=True)
@@ -26,6 +27,11 @@ class Circle(ndb.Model):
         self.with_circle = with_circle
         self.update(True)
     
+    @classmethod
+    def get_by_name(cls, name):
+        return cls.query(cls.name==name).get()
+        # todo = try-catch
+    
     def needs_update(self):
         for s in in_circle:
             if s.has_changed == True:
@@ -39,12 +45,11 @@ class Circle(ndb.Model):
     # (domain sync is a background task: sync_circles::sync_gapps)
     def update(self, is_init=False):
         if is_init:
-            # create Circles
             for p in with_circle:
                 p.create_circle(self)
         elif self.needs_update():
             # UPDATE
-
+            pass
         # UPDATE OR CREATE+LINK CIRCLES:
         # for each in with_circle:
         # check if circle is linked, if not create it and link it with Key and CircleID
@@ -58,7 +63,3 @@ class Circle(ndb.Model):
         # call update for each person in with_person
         # arg = self.key --> so person update knows which circle to update on g+
         # set to false after update
-            
-            
-            
-            
