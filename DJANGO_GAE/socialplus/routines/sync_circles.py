@@ -25,7 +25,7 @@ def sync_gapps_users():
     while True:
         for user in users["users"]:
             CirclePerson.find_or_create(user["primaryEmail"], user["orgUnitPath"])
-        if users["nextPageToken"]:
+        if "nextPageToken" in users:
             users = directory.users().list(domain=API_ACCESS_DATA[CURRENT_DOMAIN]["DOMAIN_NAME"], maxResults=500, nextPageToken=users["nextPageToken"]).execute()
         else:
             break
@@ -35,15 +35,16 @@ def sync_gapps_orgunits():
     directory = create_directory_service()
     orgunits = directory.orgunits().list(customerId=API_ACCESS_DATA[CURRENT_DOMAIN]["CUSTOMER_ID"], type="all").execute()
     for orgunit in orgunits["organizationUnits"]:
-        ou = OrgUnit.find_or_create(name=orgunit["name"], orgUnitPath=orgunit["orgUnitPath"])
+        ou = OrgUnit.find_or_create(name=orgunit["name"], orgUnitPath=orgunit["orgUnitPath"])[0]
         ou.update_from_source()
             
 
 def sync_gapps_groups():
     directory = create_directory_service()
-    groups = directory.groups().list(customerId=API_ACCESS_DATA[CURRENT_DOMAIN]["CUSTOMER_ID"]).execute()
+    groups = directory.groups().list(customer=API_ACCESS_DATA[CURRENT_DOMAIN]["CUSTOMER_ID"]).execute()
     for group in groups["groups"]:
-        g = Group.find_or_create(name=group["name"], groupEmail=group["email"])
+        pprint(group)
+        g = Group.find_or_create(name=group["name"], group_email=group["email"])[0]
         g.update_from_source()
 
 def create_circles_test():

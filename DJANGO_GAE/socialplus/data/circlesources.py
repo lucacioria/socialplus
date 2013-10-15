@@ -32,29 +32,36 @@ class CirclePerson(CircleInput):
     circles             = ndb.StructuredProperty(CircleID, repeated=True) # CirclePerson needs to know about its Circles (CircleID) in order to update them
     orgUnitPath         = ndb.StringProperty()
     
-    def __init__(self, email, orgUnitPath=None):
-        self.email          = email
-        self.orgUnitPath    = orgUnitPath
-        self.check_has_gplus()
-    
     @classmethod
     def find_or_create(cls, email, orgUnitPath=None):
-        q           = cls.query(cls.email==email)
-        obj         = q.get()
-        if obj is None: obj = cls(email=email, orgUnitPath=orgUnitPath)
-        return obj
+        q = cls.query(cls.email==email)
+        ent = q.get()
+        if ent is not None:
+            return (ent, False)
+        ent = cls(email=email,orgUnitPath=orgUnitPath)
+        ent.check_has_gplus()
+        ent.put()
+        print("creating entity")
+        return (ent, True)
     
     def people(self):
         return self
     
+    #@TODO: FIX
     def check_has_gplus(self):
-        if not has_gplus:
+        if not self.has_gplus:
             try:
+                print("entering plus check")
                 plus            = create_plus_service(self.email)
-                results         = plus.people().search(maxResults=10, query=self.email).execute()
-                self.has_gplus  = results["items"].count==1
+                people          = plus.people()
+                # pprint(people)
+                result          = people.get(userId="me").execute()
+                # pprint(result)
+                # @TODO
+                # Exception: <HttpError 401 when requesting https://www.googleapis.com/plus/v1domains/people/me?alt=json returned "Invalid Credentials">
+                self.has_gplus  = "kind" in result # or: result not None ?
             except Exception as e:
-                print e
+                print "Exception: "+format(str(e))
     
     def create_circle(self, circle):
         plus            = create_plus_service(self.email)
@@ -81,17 +88,19 @@ class OrgUnit(CircleInput):
     
     @classmethod
     def find_or_create(cls, name, orgUnitPath):
-        obj         = cls.query(cls.name==name)
-        if obj is None:
-            obj     = cls.new(name=name, orgUnitPath=orgUnitPath)
-        return obj
+        q = cls.query(cls.name==name)
+        ent = q.get()
+        if ent is not None:
+            return (ent, False)
+        ent = cls(name=name, orgUnitPath=orgUnitPath)
+        ent.put()
+        return (ent, True)
     
     def update_from_source(self):
-        if not self.people:        
-            users = CirclePerson.query(CirclePerson.orgUnitPath == orgunit["orgUnitPath"])
-            self.people = ndb.put_multi_async([x in users])  # is this equivalent to [x.key for x in users] ?
+        if not self.people:
+            users = CirclePerson.query(CirclePerson.orgUnitPath == self.orgUnitPath).fetch(9999)
+            self.people = [x.key for x in users]
         else:
-            # reset updated prior to update
             self.set_updated()
             # check if orgUnit still exists
             directory = create_directory_service()
@@ -114,26 +123,37 @@ class Group(CircleInput):
     name                = ndb.StringProperty(required=True)
     group_email         = ndb.StringProperty(required=True)
     people              = ndb.KeyProperty(kind=CirclePerson, repeated=True)
+    people_count        = ndb.ComputedProperty(lambda e: len(e.people))
     
     @classmethod
     def find_or_create(cls, name, group_email):
-        obj         = cls.query(cls.name==name)
-        if obj is None:
-            obj     = cls.new(name=name, group_email=group_email)
-        return obj
+        q = cls.query(cls.name==name)
+        ent = q.get()
+        if ent is not None:
+            return (ent, False)
+        ent = cls(name=name, group_email=group_email)
+        ent.put()
+        return (ent, True)
     
     def update_from_source(self):
         if not self.people:
-            members = directory.members().list(group["email"], maxResults=1000).execute()
-            people = []
+            directory = create_directory_service()
+            members = directory.members().list(groupKey=self.group_email, maxResults=1000).execute()
+            print("MEMBERS: ")
+            pprint(members)
+            people_keys = []
             while True:
-                for member in members["members"]:
-                    people.append(CirclePerson.find_or_create(member["email"]))
-                if members["pageToken"]:
-                    members = directory.members().list(group["email"], maxResults=1000, pageToken=members["pageToken"]).execute()
+                if "members" in members:
+                    for member in members["members"]:
+                        if "email" in member:
+                            p = CirclePerson.find_or_create(member["email"])[0]
+                            people_keys.append(p.key)
+                if "pageToken" in members:
+                    members = directory.members().list(groupKey=self.group_email, maxResults=1000, pageToken=members["pageToken"]).execute()
                 else:
                     break
-            self.people = ndb.put_multi_async([x in people])
+            self.people = people_keys
+            self.put()
         else:
             self.set_updated()
             # UPDATE
