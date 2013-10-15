@@ -19,14 +19,18 @@ def sync_users(task):
     }
     update_progress(task, "\ncalling Directory API to update list of users..\n", 0, 100)
     update_progress(task, "starting update\n", 10, 100)
-    users_api = directory.users().list(domain=API_ACCESS_DATA[CURRENT_DOMAIN]["DOMAIN_NAME"]).execute()
+    fields = "users(id,primaryEmail,orgUnitPath,name/fullName),nextPageToken"
+    max_results = 500
+    users_api = directory.users().list(domain=API_ACCESS_DATA[CURRENT_DOMAIN]["DOMAIN_NAME"], \
+      fields=fields, maxResults=max_results).execute()
     while True:
         for user in users_api['users']:
             save_user(user)
             statistics["total_users"] += 1
         if 'nextPageToken' in users_api:
             update_progress(task, str(statistics["total_users"]) + " users updated\n", 30, 100)
-            users_api = directory.users().list(domain=API_ACCESS_DATA[CURRENT_DOMAIN]["DOMAIN_NAME"], pageToken=users_api['nextPageToken']).execute()
+            users_api = directory.users().list(domain=API_ACCESS_DATA[CURRENT_DOMAIN]["DOMAIN_NAME"], \
+              fields=fields, maxResults=max_results, pageToken=users_api['nextPageToken']).execute()
         else:
             break
     # update statistics in Domain entity
