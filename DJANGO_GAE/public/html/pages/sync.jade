@@ -21,9 +21,13 @@
                 button.btn.btn-default(ng-click='startSyncTask("syncUsers")') start
             tr
               td people from users
-              td sync google plus profiles of all domain users
               td
-                button.btn.btn-default(ng-click='startSyncTask("syncPeople")') start
+                span G+ profiles from Apps Users
+                br
+                span limit to OrgUnit:
+                    input(type="text",ng-model="d.orgUnit",style="width: 200px")
+              td
+                button.btn.btn-default(ng-click='startSyncTask("syncPeople", {orgUnitPath: d.orgUnit})') start
             tr
               td activities for people
               td sync activities for all people in domain

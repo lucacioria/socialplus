@@ -10,6 +10,7 @@ from socialplus.data.tags import Tag
 class User(ndb.Model):
     full_name        = ndb.StringProperty()
     primary_email    = ndb.StringProperty()
+    org_unit_path    = ndb.StringProperty()
 
 class TagReport(ndb.Model):
     tag             = ndb.KeyProperty(kind=Tag)
@@ -64,11 +65,13 @@ def save_user(u):
     # update existing person
     if old_u_:
         old_u_.full_name = u["name"]["fullName"]
+        old_u_.org_unit_path = u["orgUnitPath"]
         old_u_.put()
         return old_u_.key
     # create new person
     else:
         u_ = User(parent=ndb.Key(User, u["id"]), id=u["id"])
         u_.full_name = u["name"]["fullName"]
+        u_.org_unit_path = u["orgUnitPath"]
         u_.primary_email = u["primaryEmail"]
         return u_.put()
