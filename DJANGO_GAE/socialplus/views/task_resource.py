@@ -48,7 +48,7 @@ def create_task(request):
     task.creation_time = datetime.datetime.now()
     id_ = task.put().urlsafe()
     # call routine url with id of Task object
-    taskqueue.add(url="/start_task/" + id_, method="GET", queue_name="sync-linear")
+    taskqueue.add(url="/start_task/" + id_, method="GET", queue_name="sync-linear", target='sync')
     # return task and 201
     return HttpResponse(task.to_json(), status=201)
 

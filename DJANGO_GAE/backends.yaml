@@ -1,0 +1,4 @@
+backends:
+- name: sync
+  options: dynamic
+  class: B1
