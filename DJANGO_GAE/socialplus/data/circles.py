@@ -48,25 +48,7 @@ class Circle(ndb.Model):
             if is_init:
                 p.create_circle(self)
             elif self.needs_update():
-                # UPDATE
-                pass
-        
-        if is_init:
-            for p in with_circle:
-                p.create_circle(self)
-        elif self.needs_update():
-            for p in with_circle:
-            pass
-        # UPDATE OR CREATE+LINK CIRCLES:
-        # for each in with_circle:
-        # check if circle is linked, if not create it and link it with Key and CircleID
-        # also check if it needs to be removed/unlinked from anyone
-        # then Step 2 = update the circle according to in_circle
-        
-        # check if the circle needs to be updated (self.needs_update)
-        # return if false, continue if true
-        # circle needs update = update existing circles, add/remove for deleted/new people
-        
-        # call update for each person in with_person
-        # arg = self.key --> so person update knows which circle to update on g+
-        # set to false after update
+                if not isinstance(p, CirclePerson) and p.removed_people:
+                    for rem in p.removed_people:
+                        
+                p.update_circle(self)

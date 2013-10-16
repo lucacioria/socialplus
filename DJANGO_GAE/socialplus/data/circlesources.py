@@ -14,12 +14,7 @@ from google.appengine.ext.ndb import polymodel
 
 
 class CircleInput(polymodel.PolyModel):
-    has_changed         = ndb.BooleanProperty(default=False)
     last_update         = ndb.DateTimeProperty(auto_now=True)
-    
-    def set_updated(self):
-        self.has_changed = False
-        return self.put()
     
 class CircleID(ndb.Model):
     circle_id           = ndb.StringProperty(default="", required=True)
@@ -30,7 +25,7 @@ class CirclePerson(CircleInput):
     has_gplus           = ndb.BooleanProperty(default=False)
     gplus_id            = ndb.StringProperty()
     circles             = ndb.StructuredProperty(CircleID, repeated=True)
-    people_count        = ndb.ComputedProperty(lambda e: len(e.circles))
+    circle_count        = ndb.ComputedProperty(lambda e: len(e.circles))
     orgUnitPath         = ndb.StringProperty()
     
     @classmethod
@@ -50,6 +45,8 @@ class CirclePerson(CircleInput):
         ent = q.get()
         if ent is None:
             return False
+        for circle in ent.circles:
+            ent.delete_circle(circle)
         ent.key.delete()
         return True
     
@@ -72,26 +69,40 @@ class CirclePerson(CircleInput):
             except Exception as e:
                 print "Exception: "+format(str(e))
     
-    def create_circle(self, circle):
+    def create_circle(self, c):
         plus            = create_plus_service(self.email)
-        circle          = plus.circles().insert(userId="me", body={'displayName': circle.name}).execute()
+        circle          = plus.circles().insert(userId="me", body={'displayName': c.name}).execute()
         circle_id       = circle.get('id')
-        self.circles.append(CircleID.new(circle_id=circle_id, circle_name=circle.name))
+        self.circles.append(CircleID(circle_id=circle_id, circle_name=c.name))
         for source in circle.in_circle:
             for pin in source.people():
                 result = plus.circles().addPeople(circleId=circle_id, email=pin.email).execute()
+        self.put()
 
+    def delete_circle(self, c):
+        cref = CirclePerson.query(CirclePerson.circles.circle_name==c.name).get()
+        circle_id = cref.circle_id
+        plus = create_plus_service(self.email)
+        plus.circles().remove(circleId=circle_id).execute()
+        cref.key.delete()
 
     def update_circle(self, circle):
-        # first: update all circles (add/remove), if in_circle has changed
-        # then: update who has the circle (add/remove), if with_circle has changed
-        pass
-
+        plus = create_plus_service(self.email)
+        circle_id = CirclePerson.query(CirclePerson.circles.circle_name==circle.name).get().circle_id
+        for inc in circle.in_circle:
+            if inc.has_changed:
+                for add in inc.added_people:
+                    plus.circles().addPeople(circleId=circle_id, email=add.email)
+                for rem in inc.removed_people:
+                    plus.circles().removePeople(circleId=circle_id, email=add.email)
 
 class CircleContainer(CircleInput):
     name                = ndb.StringProperty(required=True)
     people              = ndb.KeyProperty(kind=CirclePerson, repeated=True)
     people_count        = ndb.ComputedProperty(lambda e: len(e.people))
+    has_changed         = ndb.BooleanProperty(default=False)
+    added_people        = ndb.KeyProperty(kind=CirclePerson, repeated=True)
+    removed_people      = ndb.KeyProperty(kind=CirclePerson, repeated=True)
     
     @classmethod
     def get_list(cls):
@@ -105,7 +116,12 @@ class CircleContainer(CircleInput):
             return False
         ent.key.delete()
         return True
-
+    
+    def set_updated(self):
+        self.has_changed = False
+        ndb.delete_multi(self.added_people)
+        ndb.delete_multi(self.removed_people)
+        return self.put()
 
 class OrgUnit(CircleContainer):
     orgUnitPath         = ndb.StringProperty(required=True)
