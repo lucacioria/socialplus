@@ -42,7 +42,6 @@ class CirclePerson(CircleInput):
         ent = cls(email=email,orgUnitPath=orgUnitPath)
         ent.check_has_gplus()
         ent.put()
-        print("creating entity")
         return (ent, True)
     
     @classmethod
@@ -89,13 +88,27 @@ class CirclePerson(CircleInput):
         pass
 
 
-
-
-class OrgUnit(CircleInput):
+class CircleContainer(CircleInput):
     name                = ndb.StringProperty(required=True)
-    orgUnitPath         = ndb.StringProperty(required=True)
     people              = ndb.KeyProperty(kind=CirclePerson, repeated=True)
     people_count        = ndb.ComputedProperty(lambda e: len(e.people))
+    
+    @classmethod
+    def get_list(cls):
+        return [x.name for x in cls.query().fetch(9999)]
+    
+    @classmethod
+    def find_and_delete(cls, name):
+        q = cls.query(cls.name==name)
+        ent = q.get()
+        if ent is None:
+            return False
+        ent.key.delete()
+        return True
+
+
+class OrgUnit(CircleContainer):
+    orgUnitPath         = ndb.StringProperty(required=True)
     
     @classmethod
     def find_or_create(cls, name, orgUnitPath):
@@ -107,49 +120,39 @@ class OrgUnit(CircleInput):
         ent.put()
         return (ent, True)
     
-    # move these into a base class ...
-    @classmethod
-    def get_list(cls):
-        return [ou.name for ou in cls.query().fetch(9999)]
-    
-    @classmethod
-    def find_and_delete(cls, name):
-        q = cls.query(cls.name==name)
-        ent = q.get()
-        if ent is None:
-            return False
-        ent.key.delete()
-        return True
-    
     def update_from_source(self):
+        users = CirclePerson.query(CirclePerson.orgUnitPath == self.orgUnitPath).fetch(9999)
+        added = [x.key for x in users]
         if not self.people:
-            users = CirclePerson.query(CirclePerson.orgUnitPath == self.orgUnitPath).fetch(9999)
-            self.people = [x.key for x in users]
+            self.people = added
+            self.put()
         else:
-            # THIS updates self.people (NOT existence of orgUnit)
+            # reset self.has_changed
             self.set_updated()
             # check if orgUnit still exists
-            directory = create_directory_service()
-            exist = directory.orgunits().get(customerId=API_ACCESS_DATA[CURRENT_DOMAIN]["CUSTOMER_ID"], orgUnitPath=self.orgUnitPath).execute()
-            if not exist: return self.key.delete()
-            # it still exists, update the people in it
-            
-            
-            
-            # we assume Person Sync has run previously
-            # check diff between matching (orgUnitPath) CirclePerson object
-            # update self.people list of Keys accordingly (add/remove)
-            # if anything changed set has_changed = True
-            
-            # if changed, update set needs_update=true for Circles that contain self
-            # --> Circle.query( in_circles or with_circles )
-        
+            try:
+                directory = create_directory_service()
+                exist = directory.orgunits().get(customerId=API_ACCESS_DATA[CURRENT_DOMAIN]["CUSTOMER_ID"], orgUnitPath=self.orgUnitPath[1:]).execute()
+                if not exist: return self.key.delete()
+            except Exception, e:
+                print("EXCEPTION"+str(e))
+                print("DELETING ORGUNIT")
+                return self.key.delete()
+            # update self.people, assuming previous sync_gapps_users() call
+            removed = self.people
+            intersection = list(set(added).intersection(set(removed)))
+            added = list(set(added)-set(intersection))
+            removed = list(set(removed)-set(intersection))
+            if added or removed:
+                self.has_changed = True
+                for add in added:
+                    self.people.append(add)
+                for rem in removed:
+                    self.people.remove(rem)
+            self.put()
     
-class Group(CircleInput):
-    name                = ndb.StringProperty(required=True)
+class Group(CircleContainer):
     group_email         = ndb.StringProperty(required=True)
-    people              = ndb.KeyProperty(kind=CirclePerson, repeated=True)
-    people_count        = ndb.ComputedProperty(lambda e: len(e.people))
     
     @classmethod
     def find_or_create(cls, name, group_email):
@@ -165,8 +168,6 @@ class Group(CircleInput):
         if not self.people:
             directory = create_directory_service()
             members = directory.members().list(groupKey=self.group_email, maxResults=1000).execute()
-            print("MEMBERS: ")
-            pprint(members)
             people_keys = []
             while True:
                 if "members" in members:
