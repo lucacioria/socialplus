@@ -44,11 +44,18 @@ class Circle(ndb.Model):
     # UPDATES G+ CIRCLES
     # (domain sync is a background task: sync_circles::sync_gapps)
     def update(self, is_init=False):
+        for p in self.with_circle:
+            if is_init:
+                p.create_circle(self)
+            elif self.needs_update():
+                # UPDATE
+                pass
+        
         if is_init:
             for p in with_circle:
                 p.create_circle(self)
         elif self.needs_update():
-            # UPDATE
+            for p in with_circle:
             pass
         # UPDATE OR CREATE+LINK CIRCLES:
         # for each in with_circle:

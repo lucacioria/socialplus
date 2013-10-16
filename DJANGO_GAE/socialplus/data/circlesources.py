@@ -135,8 +135,6 @@ class OrgUnit(CircleContainer):
                 exist = directory.orgunits().get(customerId=API_ACCESS_DATA[CURRENT_DOMAIN]["CUSTOMER_ID"], orgUnitPath=self.orgUnitPath[1:]).execute()
                 if not exist: return self.key.delete()
             except Exception, e:
-                print("EXCEPTION"+str(e))
-                print("DELETING ORGUNIT")
                 return self.key.delete()
             # update self.people, assuming previous sync_gapps_users() call
             removed = self.people
@@ -165,23 +163,41 @@ class Group(CircleContainer):
         return (ent, True)
     
     def update_from_source(self):
+        directory = create_directory_service()
+        members = directory.members().list(groupKey=self.group_email, maxResults=1000).execute()
+        added = []
+        while True:
+            if "members" in members:
+                for member in members["members"]:
+                    if "email" in member:
+                        p = CirclePerson.find_or_create(member["email"])[0]
+                        added.append(p.key)
+            if "pageToken" in members:
+                members = directory.members().list(groupKey=self.group_email, maxResults=1000, pageToken=members["pageToken"]).execute()
+            else:
+                break
         if not self.people:
-            directory = create_directory_service()
-            members = directory.members().list(groupKey=self.group_email, maxResults=1000).execute()
-            people_keys = []
-            while True:
-                if "members" in members:
-                    for member in members["members"]:
-                        if "email" in member:
-                            p = CirclePerson.find_or_create(member["email"])[0]
-                            people_keys.append(p.key)
-                if "pageToken" in members:
-                    members = directory.members().list(groupKey=self.group_email, maxResults=1000, pageToken=members["pageToken"]).execute()
-                else:
-                    break
-            self.people = people_keys
+            self.people = added
             self.put()
         else:
-            # THIS updates self.people (NOT existence of Group)
+            # reset self.has_changed
             self.set_updated()
-            # UPDATE
+            # check if Group still exists
+            try:
+                directory = create_directory_service()
+                exist = directory.groups().get(groupKey=self.group_email).execute()
+                if not exist: return self.key.delete()
+            except Exception, e:
+                return self.key.delete()
+            # update self.people, assuming previous sync_gapps_users() call
+            removed = self.people
+            intersection = list(set(added).intersection(set(removed)))
+            added = list(set(added)-set(intersection))
+            removed = list(set(removed)-set(intersection))
+            if added or removed:
+                self.has_changed = True
+                for add in added:
+                    self.people.append(add)
+                for rem in removed:
+                    self.people.remove(rem)
+            self.put()
