@@ -1085,7 +1085,7 @@ try:
                         deadline=5):
             return fetch(url, payload=payload, method=method, headers=headers,
                          allow_truncated=allow_truncated,
-                         follow_redirects=follow_redirects, deadline=deadline,
+                         follow_redirects=follow_redirects, deadline=60,
                          validate_certificate=validate_certificate)
         return fixed_fetch
 
