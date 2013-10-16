@@ -1,4 +1,4 @@
 backends:
 - name: sync
   options: dynamic
-  class: B1
+  class: B8
