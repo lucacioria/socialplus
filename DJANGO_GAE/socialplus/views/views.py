@@ -18,8 +18,14 @@ def get_cookie(request):
     return HttpResponse("this GET is to set the CSRF cookie")
 
 def get_communities(request):
-    q = Activity.query(projection=["access.community_name"], distinct=True).fetch(999)
+    q = Activity.query(projection=["access.community_name"], distinct=True).fetch(9999)
     q = [x.access.community_name for x in q if x.access.community_name is not None]
+    print q
+    return HttpResponse(format_json({"items": [{"name" : x} for x in q]}))
+
+def get_providers(request):
+    q = Activity.query(projection=["provider"], distinct=True).fetch(9999)
+    q = [x.provider for x in q if x.provider is not None]
     print q
     return HttpResponse(format_json({"items": [{"name" : x} for x in q]}))
 

@@ -86,6 +86,7 @@ window.myApp.factory 'Well', ['$http', (http) ->
 		errorMessage: ""
 	people: []
 	communities: []
+	providers: []
 	reports: {}
 	]
 
@@ -139,6 +140,17 @@ window.myApp.factory 'App', ['$http', 'Well', 'Log', '$state', '$stateParams', '
 			.success (data, status, headers, config) ->
 				well_.communities = data.items
 				log_.info(TAG, "list of communities retrieved")
+			.error (data, status, headers, config) ->
+				log_.httpError(TAG, status, config)
+
+	getProviders: () ->
+		if well_.providers.length == 0
+			http
+				method: 'GET'
+				url: "/providers"
+			.success (data, status, headers, config) ->
+				well_.providers = data.items
+				log_.info(TAG, "list of providers retrieved")
 			.error (data, status, headers, config) ->
 				log_.httpError(TAG, status, config)
 

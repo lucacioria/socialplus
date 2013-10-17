@@ -31,6 +31,9 @@ window.myApp.controller 'ActivitiesCtrl', ['$scope', '$http', 'App',  (scope, ht
 	scope.$watch 'd.well.communities', (newValue, oldValue) ->
 		scope.d.adv.community_.options = (x.name for x in newValue)
 
+	scope.$watch 'd.well.providers', (newValue, oldValue) ->
+		scope.d.adv.provider_.options = (x.name for x in newValue)
+
 	scope.emails = () ->
 		(person.user_primaryEmail for person in app.well.people)
 
@@ -111,5 +114,6 @@ window.myApp.controller 'ActivitiesCtrl', ['$scope', '$http', 'App',  (scope, ht
 	scope.initActivities = () ->
 		app.getPeople()
 		app.getCommunities()
+		app.getProviders()
 
 	]

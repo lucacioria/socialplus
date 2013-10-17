@@ -19,6 +19,8 @@ urlpatterns = patterns('',
     url(r'^people$', 'socialplus.views.get_people'),
     # COMMUNITY
     url(r'^communities$', 'socialplus.views.get_communities'),
+    # PROVIDERDS
+    url(r'^providers$', 'socialplus.views.get_providers'),
     # TASKS
     url(r'^tasks$', 'socialplus.views.get_post_tasks'),
     url(r'^tasks/completed$', 'socialplus.views.get_delete_tasks_completed'),
