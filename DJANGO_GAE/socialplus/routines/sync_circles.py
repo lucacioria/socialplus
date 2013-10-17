@@ -65,6 +65,6 @@ def create_circles_test():
     inc1 = OrgUnit.query(OrgUnit.name=="Demo accounts").get().key
     inc2 = OrgUnit.query(OrgUnit.name=="Air Liquide").get().key
     wc1 = Group.query(Group.group_email=="demose@appseveryday.com").get().key
-    test_circle = Circle.new(name="TestCircle", in_circle=[inc1,inc2], with_circle=[wc])
+    test_circle = Circle(name="TestCircle", in_circle=[inc1,inc2], with_circle=[wc1])
     pprint(test_circle)
     # test_circle.update()

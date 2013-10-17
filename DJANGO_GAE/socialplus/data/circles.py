@@ -20,11 +20,11 @@ class Circle(ndb.Model):
     allow_remove            = ndb.BooleanProperty(default=False)
     last_gplus_update       = ndb.DateTimeProperty(auto_now=True)
     
-    def __init__(self, name, in_circle=[], with_circle=[]):
-        self.name = name
-        self.in_circle = in_circle
-        self.with_circle = with_circle
-        self.update(True)
+    # def __init__(self, n, inc=[], wc=[]):
+    #     self.name = n
+    #     self.in_circle = inc
+    #     self.with_circle = wc
+    #     self.update(True)
     
     @classmethod
     def get_by_name(cls, name):
@@ -33,7 +33,7 @@ class Circle(ndb.Model):
     
     def get_in_circle_list(self):
         list = []
-        for ent in self.in_circle
+        for ent in self.in_circle:
             if not isinstance(ent, CirclePerson):
                 for x in ent.people:
                     list.append(x.key)
@@ -56,7 +56,11 @@ class Circle(ndb.Model):
         for p in self.with_circle:
             ent = p.get()
             if is_init:
-                ent.create_circle(self)
+                if not isinstance(ent, CirclePerson):
+                    for x in ent.people:
+                        x.get().create_circle(self)
+                else:
+                    ent.create_circle(self)
             elif self.needs_update():
                 if not isinstance(ent, CirclePerson):
                     for rem in ent.removed_people:

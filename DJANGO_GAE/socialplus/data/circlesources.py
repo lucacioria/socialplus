@@ -54,7 +54,7 @@ class CirclePerson(CircleInput):
     
     @classmethod
     def find_by_name(cls, givenName, familyName):
-        q = cls.queryn(cls.givenName=givenName, cls.familyName=familyName)
+        q = cls.query(cls.givenName==givenName, cls.familyName==familyName)
         ent = q.get()
         if ent is None:
             return False
