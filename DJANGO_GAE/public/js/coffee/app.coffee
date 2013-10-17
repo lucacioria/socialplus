@@ -135,9 +135,9 @@ window.myApp.factory 'App', ['$http', 'Well', 'Log', '$state', '$stateParams', '
 		if well_.communities.length == 0
 			http
 				method: 'GET'
-				url: "/data/communities"
+				url: "/communities"
 			.success (data, status, headers, config) ->
-				well_.communities = data
+				well_.communities = data.items
 				log_.info(TAG, "list of communities retrieved")
 			.error (data, status, headers, config) ->
 				log_.httpError(TAG, status, config)
