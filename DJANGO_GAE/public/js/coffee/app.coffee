@@ -27,56 +27,56 @@ window.myApp.config ['$httpProvider', '$stateProvider', '$urlRouterProvider',
 			abstract: true
 			url: "/activities"
 			controller: 'ActivitiesCtrl'
-			templateUrl: "pages/activities.html"
+			templateUrl: "/public/html/pages/activities.html"
 		.state "activities.simple",
 			url: "/simple"
-			templateUrl: "pages/activities/simple.html"
+			templateUrl: "/public/html/pages/activities/simple.html"
 		.state "activities.advanced",
 			url: "/advanced"
-			templateUrl: "pages/activities/advanced.html"
+			templateUrl: "/public/html/pages/activities/advanced.html"
 		
 		.state "sync",
 			url: "/sync"
-			templateUrl: "pages/sync.html"
+			templateUrl: "/public/html/pages/sync.html"
 
 		.state "reports",
 			url: "/reports"
-			templateUrl: "pages/reports.html"
+			templateUrl: "/public/html/pages/reports.html"
 		.state "reports.detail",
 			abstract: true
 			url: "/{reportName}"
 			template: '<div ui-view></div>'
 		.state "reports.detail.ever",
 			url: "/ever"
-			templateUrl: "pages/reports/ever.html"
+			templateUrl: "/public/html/pages/reports/ever.html"
 		.state "reports.detail.byDay",
 			url: "/by_day"
-			templateUrl: "pages/reports/by_day.html"
+			templateUrl: "/public/html/pages/reports/by_day.html"
 		.state "reports.detail.byMonth",
 			url: "/by_month"
-			templateUrl: "pages/reports/by_month.html"
+			templateUrl: "/public/html/pages/reports/by_month.html"
 		.state "reports.detail.byYear",
 			url: "/by_year"
-			templateUrl: "pages/reports/by_year.html"
+			templateUrl: "/public/html/pages/reports/by_year.html"
 		
 		stateProvider.state "tags",
 			abstract: true
 			url: "/tags"
 			controller: 'TagsCtrl'
-			templateUrl: "pages/tags.html"
+			templateUrl: "/public/html/pages/tags.html"
 		.state "tags.edit",
 			url: "/edit"
-			templateUrl: "pages/tags/edit.html"
+			templateUrl: "/public/html/pages/tags/edit.html"
 		.state "tags.experts",
 			url: "/experts"
-			templateUrl: "pages/tags/experts.html"
+			templateUrl: "/public/html/pages/tags/experts.html"
 
 		.state "person",
 			url: "/person"
-			templateUrl: "pages/person.html"
+			templateUrl: "/public/html/pages/person.html"
 		.state "person.details",
 			url: "/details/{personId}"
-			templateUrl: "pages/person/details.html"
+			templateUrl: "/public/html/pages/person/details.html"
 
 	]
 

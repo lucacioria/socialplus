@@ -13,11 +13,17 @@ handlers:
   static_dir: public
   expiration: '0'
 
+- url: /
+  script: main.application
+  login: required
+
 libraries:
 - name: pycrypto
   version: "2.6"
 - name: django
   version: "1.4"
+- name: jinja2
+  version: latest
 
 env_variables:
   DJANGO_SETTINGS_MODULE: 'socialplus.settings'
