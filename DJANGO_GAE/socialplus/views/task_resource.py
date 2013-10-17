@@ -8,29 +8,35 @@ from socialplus.utils import *
 from socialplus.data.tasks import Task
 from socialplus.routines import sync_users, sync_people, \
   sync_activities, update_search_index, update_report
+from authorized_decorator import authorized
 
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
+@authorized
 def get_task(request, id_):
     task = ndb.Key(urlsafe=id_).get()
     return HttpResponse(task.to_json())
 
+@authorized
 def get_tasks(request):
     q = Task.query(ancestor=ndb.Key("Domain", "main")).order(-Task.creation_time).fetch(999)
     tasks = [x.to_dict_for_json() for x in q]
     return HttpResponse(format_json({"items": tasks}))
 
+@authorized
 def get_tasks_completed(request):
     q = Task.query(Task.completed==True, ancestor=ndb.Key("Domain", "main")).fetch(999)
     tasks = [x.to_dict_for_json() for x in q]
     return HttpResponse(format_json({"items": tasks}))
 
+@authorized
 def get_tasks_active(request):
     q = Task.query(Task.completed==False, ancestor=ndb.Key("Domain", "main")).fetch(999)
     tasks = [x.to_dict_for_json() for x in q]
     return HttpResponse(format_json({"items": tasks}))
 
+@authorized
 def create_task(request):
     # get post parameters
     data = json.loads(request.body)
@@ -52,22 +58,26 @@ def create_task(request):
     # return task and 201
     return HttpResponse(task.to_json(), status=201)
 
+@authorized
 def get_post_tasks(request):
     if request.method == 'GET':
         return get_tasks(request)
     elif request.method == 'POST':
         return create_task(request)
 
+@authorized
 def delete_tasks_completed(request):
     ndb.delete_multi(Task.query(Task.completed==True).fetch(9999, keys_only=True))
     return HttpResponse(status=204)
 
+@authorized
 def get_delete_tasks_completed(request):
     if request.method == 'GET':
         return get_tasks_completed(request)
     elif request.method == "DELETE":
         return delete_tasks_completed(request)
 
+@authorized
 def start_task(request, id_):
     # retrieve Task object from datastore
     key = ndb.Key(urlsafe=id_)
@@ -89,6 +99,7 @@ def start_task(request, id_):
     # return a HTTP 200
     return HttpResponse()
 
+@authorized
 def get_task_progress(request, taskId):
     # retrieve SyncTask object from datastore
     key = ndb.Key(urlsafe=taskId)
@@ -103,6 +114,7 @@ def get_task_progress(request, taskId):
         "progress_percentage" : sync_task.progress_percentage,
     }
 
+@authorized
 def get_all_running_tasks(request):
     q = SyncTask.query().order(-SyncTask.creation_time).fetch(100)
     o = []
@@ -117,6 +129,7 @@ def get_all_running_tasks(request):
         o.append(t)
     return HttpResponse(format_json(o))
 
+@authorized
 def delete_completed_tasks(request):
     q = SyncTask.query().fetch(100)
     o = [i.key for i in q]

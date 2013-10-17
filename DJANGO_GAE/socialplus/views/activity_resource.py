@@ -7,7 +7,9 @@ from django.http import HttpResponse
 from socialplus.utils import *
 
 from socialplus.data.activities import search_activities_paginated, get_activities
+from authorized_decorator import authorized
 
+@authorized
 def search_activities(request):
     # get query parameters
     q = request.GET.get('q', '')

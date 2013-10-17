@@ -7,10 +7,12 @@ from django.http import HttpResponse
 from socialplus.utils import *
 from socialplus.sync import *
 from socialplus.data import *
+from authorized_decorator import authorized
 
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
+@authorized
 def get_tags(request):
     from itertools import chain
     q = [dict(chain({"id_": x.key.urlsafe()}.items(), x.to_dict().items())) for x in Tag.query().fetch(100)]
@@ -19,12 +21,14 @@ def get_tags(request):
         a["search_strings"] = [{"value": x} for x in a["search_strings"]]
     return HttpResponse(format_json(q))
 
+@authorized
 def delete_tag(request, tagId):
     # retrieve Tag object from datastore
     key = ndb.Key(urlsafe=tagId)
     tag = key.delete()
     return HttpResponse("tag deleted")
 
+@authorized
 def create_tag(request):
     # retrieve Tag object from datastore
     new_tag = Tag()
@@ -32,6 +36,7 @@ def create_tag(request):
     new_tag.put()
     return HttpResponse("tag created")
 
+@authorized
 def update_tag(request, tagId):
     # retrieve Tag object from datastore
     key = ndb.Key(urlsafe=tagId)
@@ -45,6 +50,7 @@ def update_tag(request, tagId):
     # return confirmation
     return HttpResponse("tag updated")
 
+@authorized
 def get_experts(request, tagId):
     # get tag key from datastore (get)
     tag_key = ndb.Key(urlsafe=tagId)

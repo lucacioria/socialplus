@@ -6,10 +6,12 @@ from django.http import HttpResponse
 
 from socialplus.utils import *
 from socialplus.data.reports import *
+from authorized_decorator import authorized
 
 from google.appengine.api import search
 from google.appengine.ext import ndb
 
+@authorized
 def create_report(request):
     # get POST request data
     data = json.loads(request.body)
@@ -28,12 +30,14 @@ def create_report(request):
     # return report without data (which is empy now)
     return HttpResponse(report.to_json_light(), status=201)
 
+@authorized
 def delete_report(request, reportId):
     # retrieve report object from datastore
     key = ndb.Key(urlsafe=reportId)
     report = key.delete()
     return HttpResponse(status=204)
 
+@authorized
 def get_report(request, reportId):
     # retrieve Report object from datastore
     key = ndb.Key(urlsafe=reportId)
@@ -41,10 +45,12 @@ def get_report(request, reportId):
     # return report
     return HttpResponse(report.to_json())
 
+@authorized
 def get_reports(request):
     reports = [x.to_dict_for_json_light() for x in Report.query().fetch(9999)]
     return HttpResponse(format_json({"items": reports}))
 
+@authorized
 def get_post_reports(request):
     if request.method == "GET":
         return get_reports(request)
@@ -53,6 +59,7 @@ def get_post_reports(request):
     else:
         raise Exception("illegal HTTP verb")
 
+@authorized
 def get_delete_report(request, reportId):
     if request.method == "GET":
         return get_report(request, reportId)
