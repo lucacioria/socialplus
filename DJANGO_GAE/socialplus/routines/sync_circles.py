@@ -27,7 +27,7 @@ def sync_gapps_users():
             if "deletionTime" in user:
                 CirclePerson.find_and_delete(user["primaryEmail"])
                 continue
-            CirclePerson.find_or_create(user["primaryEmail"], user["orgUnitPath"])
+            CirclePerson.find_or_create(user["primaryEmail"], user["orgUnitPath"], user["name"]["givenName"], user["name"]["familyName"])
         if "nextPageToken" in users:
             users = directory.users().list(domain=API_ACCESS_DATA[CURRENT_DOMAIN]["DOMAIN_NAME"], maxResults=500, nextPageToken=users["nextPageToken"]).execute()
         else:
@@ -65,8 +65,6 @@ def create_circles_test():
     inc1 = OrgUnit.query(OrgUnit.name=="Demo accounts").get().key
     inc2 = OrgUnit.query(OrgUnit.name=="Air Liquide").get().key
     wc1 = Group.query(Group.group_email=="demose@appseveryday.com").get().key
-    inc = [inc1,inc2]
-    wc = [wc]
-    test_circle = Circle.new(name="TestCircle", in_circle=inc, with_circle=wc)
+    test_circle = Circle.new(name="TestCircle", in_circle=[inc1,inc2], with_circle=[wc])
     pprint(test_circle)
     # test_circle.update()

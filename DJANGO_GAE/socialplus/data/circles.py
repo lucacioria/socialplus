@@ -16,9 +16,8 @@ class Circle(ndb.Model):
     in_circle               = ndb.KeyProperty(kind=CircleInput, repeated=True)
     with_circle             = ndb.KeyProperty(kind=CircleInput, repeated=True)
     enforce_exist           = ndb.BooleanProperty(default=True)
-    allow_add               = ndb.BooleanProperty(default=False)
+    allow_add               = ndb.BooleanProperty(default=True)
     allow_remove            = ndb.BooleanProperty(default=False)
-    # needs_update            = ndb.BooleanProperty(default=True)
     last_gplus_update       = ndb.DateTimeProperty(auto_now=True)
     
     def __init__(self, name, in_circle=[], with_circle=[]):
@@ -31,6 +30,16 @@ class Circle(ndb.Model):
     def get_by_name(cls, name):
         q = cls.query(cls.name==name)
         return q.get()
+    
+    def get_in_circle_list(self):
+        list = []
+        for ent in self.in_circle
+            if not isinstance(ent, CirclePerson):
+                for x in ent.people:
+                    list.append(x.key)
+            else:
+                list.append(ent.key)
+        return list
     
     def needs_update(self):
         for s in in_circle:
@@ -45,10 +54,19 @@ class Circle(ndb.Model):
     # (domain sync is a background task: sync_circles::sync_gapps)
     def update(self, is_init=False):
         for p in self.with_circle:
+            ent = p.get()
             if is_init:
-                p.create_circle(self)
+                ent.create_circle(self)
             elif self.needs_update():
-                if not isinstance(p, CirclePerson) and p.removed_people:
-                    for rem in p.removed_people:
-                        
-                p.update_circle(self)
+                if not isinstance(ent, CirclePerson):
+                    for rem in ent.removed_people:
+                        rem.get().delete_circle(self)
+                    for add in ent.added_people:
+                        add.get().create_circle(self)
+                    for people in ent.people:
+                        people.get().update_circle(self)
+                else:
+                    if ent.has_circle(self):
+                        ent.update_circle(self)
+                    else:
+                        ent.create_circle(self)

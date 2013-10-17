@@ -86,7 +86,8 @@ def create_plus_service(user_email):
             "https://www.googleapis.com/auth/plus.circles.write",
             "https://www.googleapis.com/auth/plus.profiles.read",
             "https://www.googleapis.com/auth/plus.stream.read",
-            "https://www.googleapis.com/auth/plus.stream.write"
+            "https://www.googleapis.com/auth/plus.stream.write",
+            "https://www.googleapis.com/auth/plus.me"
         ], sub=user_email)
         http = credentials.authorize(http)
         cache.set('plus_http_' + user_email, http, 30)

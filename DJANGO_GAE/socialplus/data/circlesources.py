@@ -22,19 +22,21 @@ class CircleID(ndb.Model):
 
 class CirclePerson(CircleInput):
     email               = ndb.StringProperty(required=True)
-    has_gplus           = ndb.BooleanProperty(default=False)
+    givenName           = ndb.StringProperty()
+    familyName          = ndb.StringProperty()
+    has_gplus           = ndb.BooleanProperty(default=True)
     gplus_id            = ndb.StringProperty()
     circles             = ndb.StructuredProperty(CircleID, repeated=True)
     circle_count        = ndb.ComputedProperty(lambda e: len(e.circles))
     orgUnitPath         = ndb.StringProperty()
     
     @classmethod
-    def find_or_create(cls, email, orgUnitPath=None):
+    def find_or_create(cls, email, orgUnitPath=None, givenName=None, familyName=None):
         q = cls.query(cls.email==email)
         ent = q.get()
         if ent is not None:
             return (ent, False)
-        ent = cls(email=email,orgUnitPath=orgUnitPath)
+        ent = cls(email=email,orgUnitPath=orgUnitPath, givenName=givenName, familyName=familyName)
         ent.check_has_gplus()
         ent.put()
         return (ent, True)
@@ -50,28 +52,43 @@ class CirclePerson(CircleInput):
         ent.key.delete()
         return True
     
+    @classmethod
+    def find_by_name(cls, givenName, familyName):
+        q = cls.queryn(cls.givenName=givenName, cls.familyName=familyName)
+        ent = q.get()
+        if ent is None:
+            return False
+        return ent
+    
     def people(self):
         return self
     
-    #@TODO: FIX
     def check_has_gplus(self):
         if not self.has_gplus:
-            try:
-                print("entering plus check")
-                plus            = create_plus_service(self.email)
-                people          = plus.people()
-                # pprint(people)
-                result          = people.get(userId="me").execute()
-                # pprint(result)
-                # @TODO
-                # Exception: <HttpError 401 when requesting https://www.googleapis.com/plus/v1domains/people/me?alt=json returned "Invalid Credentials">
-                self.has_gplus  = "kind" in result # or: result not None ?
-            except Exception as e:
-                print "Exception: "+format(str(e))
+            plus = create_plus_service(self.email)
+            has = plus.people().get("me")
+            self.has_gplus = has["isPlusUser"]
+            self.put()
+        return self.has_gplus
     
+    def has_circle(self, c):
+        return not not CirclePerson.query(CirclePerson.circles.circle_name==c.name).get()
+    
+    def circle_is_online(self, c):
+        if not self.has_circle(c):
+            return False
+        else:
+            cref = CirclePerson.query(CirclePerson.circles.circle_name==c.name).get()
+            circle_id = cref.circle_id
+            plus = create_plus_service(self.email)
+            try:
+                return not not plus.circles.get(circleId=circle_id)
+            except Exception, e:
+                return False
+
     def create_circle(self, c):
         plus            = create_plus_service(self.email)
-        circle          = plus.circles().insert(userId="me", body={'displayName': c.name}).execute()
+        circle          = plus.circles().insert(userId=self.email, body={'displayName': c.name}).execute()
         circle_id       = circle.get('id')
         self.circles.append(CircleID(circle_id=circle_id, circle_name=c.name))
         for source in circle.in_circle:
@@ -82,19 +99,48 @@ class CirclePerson(CircleInput):
     def delete_circle(self, c):
         cref = CirclePerson.query(CirclePerson.circles.circle_name==c.name).get()
         circle_id = cref.circle_id
-        plus = create_plus_service(self.email)
-        plus.circles().remove(circleId=circle_id).execute()
+        try:
+            plus = create_plus_service(self.email)
+            plus.circles().remove(circleId=circle_id).execute()
+        except Exception, e:
+            print(str(e))
         cref.key.delete()
 
-    def update_circle(self, circle):
+    def update_circle(self, c):
         plus = create_plus_service(self.email)
-        circle_id = CirclePerson.query(CirclePerson.circles.circle_name==circle.name).get().circle_id
-        for inc in circle.in_circle:
+        cref = CirclePerson.query(CirclePerson.circles.circle_name==c.name).get()
+        circle_id = cref.circle_id
+        for inc in c.in_circle:
             if inc.has_changed:
                 for add in inc.added_people:
                     plus.circles().addPeople(circleId=circle_id, email=add.email)
                 for rem in inc.removed_people:
-                    plus.circles().removePeople(circleId=circle_id, email=add.email)
+                    plus.circles().removePeople(circleId=circle_id, email=rem.email)
+    
+    def update_circle_with_policies(self, c):
+        plus = create_plus_service(self.email)
+        cref = CirclePerson.query(CirclePerson.circles.circle_name==c.name).get()
+        circle_id = cref.circle_id
+        plus_circle = plus.people().listByCircle(circleId=circle_id).execute()
+        in_circle_user_added = []
+        in_circle_user_removed = [x.get().email for x in c.get_in_circle_list()]
+        if not (c.allow_add and c.allow_remove):
+            for person in plus_circle["items"]:
+                found = CirclePerson.find_by_name(person["name"]["givenName"], person["name"]["familyName"])
+                if found: # Person is supposed to be in the circle
+                    in_circle_user_removed.remove(found.key)
+                else:
+                    in_circle_user_added.append(person["id"])
+            if not c.allow_add:
+                for pid in in_circle_user_added:
+                    plus.circles().removePeople(circleId=circle_id, userId=pid)
+            if not c.allow_remove:
+                for key in in_circle_user_removed:
+                    plus.circles().addPeople(circleId=circle_id, email=key.get().email)
+        if c.enforce_exist and not self.circle_is_online(c):
+            self.delete_circle(c)
+            self.create_circle(c)
+
 
 class CircleContainer(CircleInput):
     name                = ndb.StringProperty(required=True)
@@ -161,8 +207,10 @@ class OrgUnit(CircleContainer):
                 self.has_changed = True
                 for add in added:
                     self.people.append(add)
+                    self.added_people.append(add)
                 for rem in removed:
                     self.people.remove(rem)
+                    self.removed_people.append(rem)
             self.put()
     
 class Group(CircleContainer):
@@ -214,6 +262,8 @@ class Group(CircleContainer):
                 self.has_changed = True
                 for add in added:
                     self.people.append(add)
+                    self.added_people.append(add)
                 for rem in removed:
                     self.people.remove(rem)
+                    self.removed_people.append(rem)
             self.put()
