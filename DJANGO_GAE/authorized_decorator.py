@@ -5,7 +5,7 @@ from google.appengine.ext import webapp
 
 def authorized(f):
     def decorated_call(self):
-        if "@lumapps.com" in users.get_current_user().email() or "@google.com" in users.get_current_user().email() or "@oxylane.com" in users.get_current_user().email():
+        if "@lumapps.com" in users.get_current_user().email() or "@google.com" in users.get_current_user().email() or "@oxylane.com" in users.get_current_user().email() or "@gpartner.eu" in users.get_current_user().email():
             return f(self)
         else:
             webapp.abort(401)
