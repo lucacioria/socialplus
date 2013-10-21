@@ -6,7 +6,7 @@ from pprint import pprint
 
 from socialplus.utils import *
 from socialplus.data import *
-from socialplus.api import * 
+from socialplus.api import *
 
 from google.appengine.api import search
 from google.appengine.ext import ndb
@@ -87,11 +87,12 @@ class CirclePerson(CircleInput):
                 return False
 
     def create_circle(self, c):
+        pprint(c)
         plus            = create_plus_service(self.email)
-        circle          = plus.circles().insert(userId=self.email, body={'displayName': c.name}).execute()
+        circle          = plus.circles().insert(userId="me", body={'displayName': c.name}).execute()
         circle_id       = circle.get('id')
         self.circles.append(CircleID(circle_id=circle_id, circle_name=c.name))
-        for source in circle.in_circle:
+        for source in c.in_circle:
             for pin in source.people():
                 result = plus.circles().addPeople(circleId=circle_id, email=pin.email).execute()
         self.put()

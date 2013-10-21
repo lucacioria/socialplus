@@ -20,11 +20,12 @@ class Circle(ndb.Model):
     allow_remove            = ndb.BooleanProperty(default=False)
     last_gplus_update       = ndb.DateTimeProperty(auto_now=True)
     
-    # def __init__(self, n, inc=[], wc=[]):
-    #     self.name = n
-    #     self.in_circle = inc
-    #     self.with_circle = wc
-    #     self.update(True)
+    def __init__(self, n, inc, wc):
+        self.name = n
+        self.in_circle = inc
+        self.with_circle = wc
+        self.update(True)
+        return self.put()
     
     @classmethod
     def get_by_name(cls, name):
@@ -49,6 +50,14 @@ class Circle(ndb.Model):
             if t.has_changed == True:
                 return True
         return False
+    
+    def add_to_in_circle(self, circle_input):
+        self.in_circle.append(circle_input)
+        return self.put()
+    
+    def add_to_with_circle(self, circle_input):
+        self.with_circle.append(circle_input)
+        return self.put()
     
     # UPDATES G+ CIRCLES
     # (domain sync is a background task: sync_circles::sync_gapps)

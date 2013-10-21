@@ -27,18 +27,24 @@ urlpatterns = patterns('',
     # REPORTS
     url(r'^reports/(?P<reportId>[^/]+)$', 'socialplus.views.get_delete_report'),
     url(r'^reports$', 'socialplus.views.get_post_reports'),
+    # CIRLCES
+    url(r'^circle/create$', 'socialplus.circles.create_circle'), # needs to provide "name" in request body
+    url(r'^circle/delete/(?P<circleId>[^/]+)$', 'socialplus.circles.delete_circle'),
+    url(r'^circle/udpate/(?P<circleId>[^/]+)$', 'socialplus.circles.update_circle'),
+    url(r'^circle/get/(?P<circleId>[^/]+)$', 'socialplus.circles.get_circle'),
+    url(r'^circle/inadd/(?P<circleId>[^/]+)$', 'socialplus.circles.add_to_in_circle'),
+    url(r'^circle/wadd/(?P<circleId>[^/]+)$', 'socialplus.circles.add_to_with_circle'),
+    url(r'^circle/get/all$', 'socialplus.circles.get_all_circles'),
+    url(r'^circle/sync/circles$', 'socialplus.circles.sync_all_circles'),
+    url(r'^circle/sync/domain$', 'socialplus.circles.sync_domain'),
+    
+    ####
     # OLD STUFF
     url(r'^tag/create$', 'socialplus.views.create_tag'),
     url(r'^tag/update/(?P<tagId>[^/]+)$', 'socialplus.views.update_tag'),
     url(r'^tag/delete/(?P<tagId>[^/]+)$', 'socialplus.views.delete_tag'),
     url(r'^tag/experts/(?P<tagId>[^/]+)$', 'socialplus.views.get_experts'),
     url(r'^tags$', 'socialplus.views.get_tags'),
-
-    url(r'^autocircle/create$', 'socialplus.circles.create_autocircle'),
-    url(r'^autocircle/update/(?P<autocircleId>[^/]+)$', 'socialplus.circles.update_autocircle'),
-    url(r'^autocircle/delete/(?P<autocircleId>[^/]+)$', 'socialplus.circles.delete_autocircle'),
-    url(r'^autocircles$', 'socialplus.circles.get_autocircles'),
-    url(r'^autocircles/sync_all$', 'socialplus.circles.sync_all_circles'),
     
     url(r'^task/sync/(?P<taskName>[^/]+)$', 'socialplus.views.start_sync'),
     url(r'^task/progress/(?P<taskId>[^/]+)$', 'socialplus.views.get_task_progress'),

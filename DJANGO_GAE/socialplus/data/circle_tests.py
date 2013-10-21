@@ -10,4 +10,3 @@ from socialplus.api import *
 from google.appengine.api import search
 from google.appengine.ext import ndb
 
-def test_
