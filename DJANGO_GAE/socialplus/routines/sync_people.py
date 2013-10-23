@@ -2,6 +2,7 @@
 import httplib2
 import json
 import logging
+import traceback
 
 from socialplus.utils import *
 
@@ -22,6 +23,7 @@ def _sync_person_profile(user):
     try:
         person_api = plus.people().get(userId=user.primary_email).execute()
     except: #todo restrict to right exception HttpError 404 dove cazzo si importa
+        logging.error("Error fetch person %s : %s" % (user.primary_email, traceback.format_exc()))
         return statistics
     person = save_person(person_api, user)
     statistics["is_person"] = True
