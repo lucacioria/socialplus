@@ -77,7 +77,6 @@ def get_delete_tasks_completed(request):
     elif request.method == "DELETE":
         return delete_tasks_completed(request)
 
-@authorized
 def start_task(request, id_):
     # retrieve Task object from datastore
     key = ndb.Key(urlsafe=id_)
