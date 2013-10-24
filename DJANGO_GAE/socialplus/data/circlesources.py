@@ -153,7 +153,7 @@ class CircleContainer(CircleInput):
     
     @classmethod
     def get_list(cls):
-        return [x.name for x in cls.query().fetch(9999)]
+        return [x.name for x in cls.query().fetch(9999)] # @TODO: if called from OrgUnit, does this only return OrgUnit Names? or all names?
     
     @classmethod
     def find_and_delete(cls, name):

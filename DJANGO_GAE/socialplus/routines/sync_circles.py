@@ -41,7 +41,7 @@ def sync_gapps_orgunits():
         ou = OrgUnit.find_or_create(name=orgunit["name"], orgUnitPath=orgunit["orgUnitPath"])[0]
         domain_orgunits.append(orgunit["name"])
         ou.update_from_source()
-    stored_orgunits = OrgUnits.get_list()
+    stored_orgunits = OrgUnit.get_list()
     print("STORED ORGUNITS")
     pprint(stored_orgunits)
     # @TODO: this is not a reliable check
@@ -50,17 +50,27 @@ def sync_gapps_orgunits():
             if a in stored_orgunits:
                 domain_orgunits.remove(a)
     for name in domain_orgunits:
-        CircleContainer.find_and_delete(name)
+        OrgUnit.find_and_delete(name)
 
 def sync_gapps_groups():
     directory = create_directory_service()
     groups = directory.groups().list(customer=API_ACCESS_DATA[CURRENT_DOMAIN]["CUSTOMER_ID"]).execute()
+    domain_groups = []
     for group in groups["groups"]:
         pprint(group)
         g = Group.find_or_create(name=group["name"], group_email=group["email"])[0]
+        domain_groups.append(group["name"])
         g.update_from_source()
     # @TODO: single out and handle deleted Groups
-    
+    stored_groups = Group.get_list()
+    print("STORED GROUPS")
+    pprint(stored_groups)
+    if len(domain_groups)!=len(stored_groups):
+        for a in domain_groups:
+            if a in stored_groups:
+                domain_groups.remove(a)
+    for name in domain_groups:
+        Group.find_and_delete(name)
 
 def create_circles_test():
     inc1 = OrgUnit.query(OrgUnit.name=="Demo accounts").get().key
