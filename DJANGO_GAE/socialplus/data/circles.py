@@ -20,12 +20,13 @@ class Circle(ndb.Model):
     allow_remove            = ndb.BooleanProperty(default=False)
     last_gplus_update       = ndb.DateTimeProperty(auto_now=True)
     
-    def __init__(self, n, inc, wc):
-        self.name = n
+    def __init__(self, name, inc, wc):
+        super(Circle, self).__init__()
+        self.name = name
         self.in_circle = inc
         self.with_circle = wc
         self.update(True)
-        return self.put()
+        self.put()
     
     @classmethod
     def get_by_name(cls, name):
