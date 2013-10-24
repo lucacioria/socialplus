@@ -3,6 +3,9 @@ mixin entry(name, state)
         a(ui-sref="#{state}") #{name}
 
 #main-menu(ng-controller="MenuCtrl", ng-init="initCookie()")
+    #logo(style="float:left; margin-right: 10px;")
+        img(src="/public/img/logo.png", style="height: 40px")
+
     ul.nav.nav-pills(style="margin:10px")
         mixin entry('sync', 'sync')
         mixin entry('activities', 'activities.simple')
