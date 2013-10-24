@@ -3,6 +3,19 @@ socialplus
 
 Social Plus - Google+ for Enterprise
 
+Install on Ubuntu
+------
+
+sudo add-apt-repository ppa:chris-lea/node.js
+sudo apt-get install nodejs
+
+sudo npm install -g coffee-script
+
+sudo npm install -g jade
+
+sudo apt-get install ruby1.9.1
+sudo gem install sass
+
 Deploy
 ------
 
