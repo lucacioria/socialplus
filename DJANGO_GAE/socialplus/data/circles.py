@@ -33,6 +33,16 @@ class Circle(ndb.Model):
         q = cls.query(cls.name==name)
         return q.get()
     
+    @classmethod
+    def find_or_create(cls, name, inc, wc):
+        q = cls.query(cls.name==name)
+        ent = q.get()
+        if ent is not None:
+            return (ent, False)
+        ent = cls(name, inc, wc)
+        return (ent, True)
+
+    
     def get_in_circle_list(self):
         list = []
         for ent in self.in_circle:
