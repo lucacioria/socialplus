@@ -21,3 +21,8 @@ _yardoc
 doc/
 
 *.DS_Store
+
+.sass-cache/
+
+datastore*
+.search_index
