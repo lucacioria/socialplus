@@ -18,7 +18,8 @@ class CircleInput(polymodel.PolyModel):
     
 class CircleID(ndb.Model):
     circle_id           = ndb.StringProperty(default="", required=True)
-    circle_name         = ndb.StringProperty(required=True)
+    circle_name         = ndb.StringProperty()
+    circle_key          = ndb.KeyProperty(required=True)
 
 class CirclePerson(CircleInput):
     email               = ndb.StringProperty(required=True)
@@ -61,7 +62,7 @@ class CirclePerson(CircleInput):
         return ent
     
     def people(self):
-        return self
+        return [self]
     
     def check_has_gplus(self):
         if not self.has_gplus:
@@ -72,13 +73,13 @@ class CirclePerson(CircleInput):
         return self.has_gplus
     
     def has_circle(self, c):
-        return not not CirclePerson.query(CirclePerson.circles.circle_name==c.name).get()
+        return not not CirclePerson.query(CirclePerson.circles.circle_key==c.key).get()
     
     def circle_is_online(self, c):
         if not self.has_circle(c):
             return False
         else:
-            cref = CirclePerson.query(CirclePerson.circles.circle_name==c.name).get()
+            cref = CirclePerson.query(CirclePerson.circles.circle_key==c.key).get()
             circle_id = cref.circle_id
             plus = create_plus_service(self.email)
             try:
@@ -87,14 +88,12 @@ class CirclePerson(CircleInput):
                 return False
 
     def create_circle(self, c):
-        pprint(c)
         plus            = create_plus_service(self.email)
         circle          = plus.circles().insert(userId="me", body={'displayName': c.name}).execute()
         circle_id       = circle.get('id')
-        self.circles.append(CircleID(circle_id=circle_id, circle_name=c.name))
-        for source in c.in_circle:
-            for pin in source.people():
-                result = plus.circles().addPeople(circleId=circle_id, email=pin.email).execute()
+        self.circles.append(CircleID(circle_id=circle_id, circle_name=c.name, circle_key=c.key))
+        for pin in [source.people() for source in c.in_circle]:
+            result = plus.circles().addPeople(circleId=circle_id, email=pin.email).execute()
         self.put()
 
     def delete_circle(self, c):
@@ -142,6 +141,10 @@ class CirclePerson(CircleInput):
             self.delete_circle(c)
             self.create_circle(c)
 
+    def update_all_circles(self):
+        for ent in [circle.circle_key.get() for circle in self.circles]:
+            if ent.needs_update_in_circle():
+                self.update_circle_with_policies(ent)
 
 class CircleContainer(CircleInput):
     name                = ndb.StringProperty(required=True)
@@ -169,6 +172,24 @@ class CircleContainer(CircleInput):
         ndb.delete_multi(self.added_people)
         ndb.delete_multi(self.removed_people)
         return self.put()
+    
+    def people_with_diff(self):
+        p = self.people
+        for add in self.added_people:
+            p.append(add)
+        for rem in self.removed_people:
+            p.remove(rem)
+        return p
+    
+    def reset_diff(self):
+        for add in self.added_people:
+            self.people.append(add)
+            self.added_people = []
+        for rem in removed:
+            self.people.remove(rem)
+            self.removed_people = []
+        self.has_changed = False
+        self.put()
 
 class OrgUnit(CircleContainer):
     orgUnitPath         = ndb.StringProperty(required=True)
@@ -190,8 +211,6 @@ class OrgUnit(CircleContainer):
             self.people = added
             self.put()
         else:
-            # reset self.has_changed
-            self.set_updated()
             # check if orgUnit still exists
             try:
                 directory = create_directory_service()
@@ -207,13 +226,11 @@ class OrgUnit(CircleContainer):
             if added or removed:
                 self.has_changed = True
                 for add in added:
-                    self.people.append(add)
                     self.added_people.append(add)
                 for rem in removed:
-                    self.people.remove(rem)
                     self.removed_people.append(rem)
             self.put()
-    
+
 class Group(CircleContainer):
     group_email         = ndb.StringProperty(required=True)
     
@@ -245,8 +262,6 @@ class Group(CircleContainer):
             self.people = added
             self.put()
         else:
-            # reset self.has_changed
-            self.set_updated()
             # check if Group still exists
             try:
                 directory = create_directory_service()
@@ -262,9 +277,7 @@ class Group(CircleContainer):
             if added or removed:
                 self.has_changed = True
                 for add in added:
-                    self.people.append(add)
                     self.added_people.append(add)
                 for rem in removed:
-                    self.people.remove(rem)
                     self.removed_people.append(rem)
             self.put()

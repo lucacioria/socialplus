@@ -44,6 +44,7 @@ def sync_gapps_orgunits():
     stored_orgunits = OrgUnit.get_list()
     print("STORED ORGUNITS")
     pprint(stored_orgunits)
+    # Handling added/removed OrgUnits
     # @TODO: this is not a reliable check
     if len(domain_orgunits)!=len(stored_orgunits):
         for a in domain_orgunits:
@@ -71,6 +72,14 @@ def sync_gapps_groups():
                 domain_groups.remove(a)
     for name in domain_groups:
         Group.find_and_delete(name)
+
+def gplus_sync():
+    for circle in [x.get() for x in Circle.query().fetch(9999)]:
+        circle.update_with_circle()
+    for ent in [x.get() for x in CirclePerson.query().fetch(9999)]:
+        ent.update_all_circles()
+    for container in [x.get() for x in CircleContainer.query().fetch(9999)]:
+        ent.reset_diff()
 
 def create_circles_test():
     inc1 = OrgUnit.query(OrgUnit.name=="Demo accounts").get().key

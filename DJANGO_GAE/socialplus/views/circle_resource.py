@@ -67,15 +67,20 @@ def create_circles_test():
     test_circle.update()
     pprint(test_circle)
 
+def gplus_sync():
+    for circle in [x.get() for x in Circle.query().fetch(9999)]:
+        circle.update_with_circle()
+    for ent in [x.get() for x in CirclePerson.query().fetch(9999)]:
+        ent.update_all_circles()
+    for container in [x.get() for x in CircleContainer.query().fetch(9999)]:
+        ent.reset_diff()
 # Background Sync
 def sync_domain(request):
     sync_gapps()
     return HttpResponse("Directory Structure synced")
 
 def sync_all_circles(request):
-    q = Circle.query().fetch(9999)
-    for circle in q:
-        circle.update()
+    gplus_sync()
     return HttpResponse("all circles updated")
 
 def get_all_circles(request):
@@ -91,6 +96,11 @@ def create_circle(request):
     data = json.loads(request.body)
     c = Circle(data["name"])
     return HttpResponse("circle created")
+
+def publish_circle(request, circleId):
+    ent = ndb.Key(urlsafe=circleId).get()
+    ent.create_circle()
+    return HttpResponse("circle published")
 
 def update_circle(request, circleId):
     ent = ndb.Key(urlsafe=circleId).get()
