@@ -16,7 +16,7 @@ div.row.panel
 				span(style="color:#aaa; margin-left: 5px;") {{a.published | formatUTCLong}}
 			p 
 				span.badge(ng-repeat="tag in a.tags", style="margin-right: 10px; opacity: .5") {{tag}}
-				span {{a.title | trim}}
+				span(ng-bind-html="asHtml(a.object.content)")
 	div.col-lg-2
 		i(ng-show="a.access.domainRestricted", class="glyphicon glyphicon-lock pull-right", style="margin-left: 10px")
 		i(ng-show="a.verb=='share'", class="glyphicon glyphicon-share-alt pull-right", style="margin-left: 10px")
