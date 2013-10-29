@@ -71,12 +71,14 @@ class Activity(ndb.Model):
         return a
 
 def save_activity_search_document(a):
+    restricted = "yes" if a.access.domain_restricted else "no"
     doc = search.Document(
         doc_id = a.key.urlsafe(),
         fields=[
             search.HtmlField(name='content', value=a.object_.content),
             search.DateField(name='published', value=a.published.date()),
             search.AtomField(name='visibility', value=a.access.visibility),
+            search.AtomField(name='restricted', value=restricted),
             search.AtomField(name='community', value=a.access.community_name),
             search.AtomField(name='provider', value=a.provider),
             search.AtomField(name='verb', value=a.verb),
