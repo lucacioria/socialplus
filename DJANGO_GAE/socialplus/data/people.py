@@ -40,6 +40,18 @@ class Person(ndb.Model):
             tag_report["id"] = tag["id"]
         return p
 
+    def to_dict_for_json_light(self):
+        p = self.to_dict_with_id()
+        del p["activities_last_updated"]
+        del p["id"]
+        del p["image_url"]
+        del p["tags"]
+        del p["user"]
+        return p
+
+    def to_json_light(self):
+        return format_json(self.to_dict_for_json_light())
+
 def save_person(p, user):
     old_p_ = ndb.Key(Person, p["id"], parent=user.key).get()
 

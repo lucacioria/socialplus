@@ -15,5 +15,5 @@ def get_person(request, id_):
     return HttpResponse(person.to_json())
 
 def get_people(request):
-    people = [x.to_dict_for_json() for x in Person.query().fetch(9999)]
+    people = [x.to_dict_for_json_light() for x in Person.query().fetch(9999)]
     return HttpResponse(format_json({"items": people}))
