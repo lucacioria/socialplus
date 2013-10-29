@@ -36,7 +36,7 @@ window.myApp.controller 'ActivitiesCtrl', ['$scope', '$http', 'App',  (scope, ht
 		scope.d.adv.provider_.options = (x.name for x in newValue)
 
 	scope.emails = () ->
-		(person.user_primaryEmail for person in app.well.people)
+		(person.userPrimaryEmail for person in app.well.people)
 
 	getFieldValue = (field) ->
 		out = ""

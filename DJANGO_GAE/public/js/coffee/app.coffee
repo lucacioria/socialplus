@@ -125,9 +125,9 @@ window.myApp.factory 'App', ['$http', 'Well', 'Log', '$state', '$stateParams', '
 		if well_.people.length == 0
 			http
 				method: 'GET'
-				url: "/data/people"
+				url: "/people"
 			.success (data, status, headers, config) ->
-				well_.people = data
+				well_.people = data.items
 				log_.info(TAG, "list of people retrieved")
 			.error (data, status, headers, config) ->
 				log_.httpError(TAG, status, config)
