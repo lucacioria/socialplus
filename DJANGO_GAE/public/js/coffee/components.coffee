@@ -1,7 +1,11 @@
-window.myApp.directive "activity", ->
+window.myApp.directive "activity",  [ '$sce', ($sce) ->
   restrict: "E"
   transclude: false
   templateUrl: "/public/html/partials/activity.html"
+  link: ($scope, $element, $attrs) ->
+    $scope.asHtml = (input) ->
+      return $sce.trustAsHtml(input)
+  ]
 
 window.myApp.directive "activityBox", [ '$http', 'App', ($http, app) ->
   transclude: false
