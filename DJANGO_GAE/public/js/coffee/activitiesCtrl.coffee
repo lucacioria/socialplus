@@ -13,6 +13,7 @@ window.myApp.controller 'ActivitiesCtrl', ['$scope', '$http', 'App',  (scope, ht
 		author_: {value: undefined, negate: false, name: "author"}
 		published_: {value: "", negate: false, name: "published"}
 		verb_: {value: undefined, negate: false, name: "verb", options: ["post", "share"]}
+		restricted_: {value: undefined, negate: false, name: "restricted", options: ["yes", "no"]}
 		visibility_: {value: undefined, negate: false, name: "visibility", options: ["shared privately", "extended circles", "public", "domain", "private community", "public community", "restricted community"]}
 		community_: {value: undefined, negate: false, name: "community", options: []}
 		provider_: {value: undefined, negate: false, name: "provider"}
