@@ -3,5 +3,5 @@
 	activity(ng-repeat='a in d.activities.items')
 	.pull-right(style="margin-bottom: 30px")
 		a(ng-click="getPreviousPage()", ng-show="d.page > 1") < previous
-		span(ng-show="d.page>1")  (page {{d.page}})
-		a(ng-click="getNextPage()", ng-show="d.activities.cursor != undefined && d.activities.cursor != 'null'") next >
+		span(ng-show="d.page>1", style="margin-left: 10px;margin-right:10px")  (page {{d.page}})
+		a(ng-click="getNextPage()", ng-show="d.activities && d.activities.morePagesAvailable") next >
