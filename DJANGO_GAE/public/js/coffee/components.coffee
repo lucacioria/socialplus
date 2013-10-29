@@ -16,7 +16,7 @@ window.myApp.directive "activityBox", [ '$http', 'App', ($http, app) ->
   
   link: ($scope, $element, $attrs) ->
     TAG = "activityBox directive"
-    $scope.d = {activities: {}, page: 1, loading: false}
+    $scope.d = {activities: {}, page: 1, cursors: [], loading: false}
     $scope.getFirstPage = () ->
       $scope.d.loading = true
       $http
@@ -38,10 +38,31 @@ window.myApp.directive "activityBox", [ '$http', 'App', ($http, app) ->
         url: "/activities"
         params:
           q: $scope.searchString
-          nextPageCursor: $scope.d.activities.cursor
+          nextPageCursor: $scope.d.activities.nextPageCursor
       .success (data, status, headers, config) ->
         $scope.d.loading = false
+        $scope.d.cursors.push($scope.d.activities.nextPageCursor)
         $scope.d.activities = data
+        $scope.d.page += 1
+        scroll(0,300);
+      .error (data, status, headers, config) ->
+        $scope.d.loading = false
+        app.log.httpError(TAG, status, config)
+    $scope.getPreviousPage = () ->
+      return if $scope.d.activities.cursor == 'null'
+      $scope.d.loading = true
+      $http
+        method: 'GET'
+        url: "/activities"
+        params:
+          q: $scope.searchString
+          nextPageCursor: $scope.d.cursors[-1]
+      .success (data, status, headers, config) ->
+        $scope.d.loading = false
+        $scope.d.cursors.pop()
+        $scope.d.activities = data
+        $scope.d.page -= 1
+        scroll(0,300);
       .error (data, status, headers, config) ->
         $scope.d.loading = false
         app.log.httpError(TAG, status, config)

@@ -45,5 +45,4 @@ mixin formline_autocomplete(label, model, autocomplete)
 			pre(style="margin-top:10px; opacity:0.3; ") SEARCH STRING: {{getSearchString()}}
 .row
 	.col-lg-12
-		activity(ng-repeat='a in d.advSearchData.items')
-	a(ng-click="getNextPage()") next..
+		div(activity-box="", search-string="{{d.finalSearchString}}")

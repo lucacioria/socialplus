@@ -4,6 +4,7 @@ window.myApp.controller 'ActivitiesCtrl', ['$scope', '$http', 'App',  (scope, ht
 	scope.d = {}
 	scope.d.simpleSearchData = []
 	scope.d.keywords = ""
+	scope.d.finalSearchString = ""
 	scope.d.advSearchData = []
 	scope.d.well = app.well
 	scope.d.tabName = 'advanced'
@@ -55,37 +56,7 @@ window.myApp.controller 'ActivitiesCtrl', ['$scope', '$http', 'App',  (scope, ht
 			(getFieldValue(value) for key, value of scope.d.adv).join('')
 
 	scope.getActivities = () ->
-		scope.d.loading = true
-		http
-			method: 'GET'
-			url: "/activities"
-			params:
-				q: scope.getSearchString()
-		.success (data, status, headers, config) ->
-			scope.d.loading = false
-			if scope.d.tabName == 'simple'
-				scope.d.simpleSearchData = data
-			else if scope.d.tabName == 'advanced'
-				scope.d.advSearchData = data
-		.error (data, status, headers, config) ->
-			app.log.httpError(TAG, status, config)
-
-	scope.getNextPage = () ->
-		scope.d.loading = true
-		http
-			method: 'GET'
-			url: "/activities"
-			params:
-				q: scope.getSearchString()
-				nextPageCursor: scope.d.advSearchData.cursor
-		.success (data, status, headers, config) ->
-			scope.d.loading = false
-			if scope.d.tabName == 'simple'
-				scope.d.simpleSearchData = data
-			else if scope.d.tabName == 'advanced'
-				scope.d.advSearchData = data
-		.error (data, status, headers, config) ->
-			app.log.httpError(TAG, status, config)
+		scope.d.finalSearchString = scope.getSearchString()
 
 	scope.createReport = () ->
 		scope.d.createReportButton.creating = true
@@ -104,13 +75,6 @@ window.myApp.controller 'ActivitiesCtrl', ['$scope', '$http', 'App',  (scope, ht
 
 	scope.viewPerson = (id_) ->
 		app.state.go('person', {personId: id_})
-
-		# http.get "/data/person/" + id_
-		# .success (data, status, headers, config) ->
-		# 	scope.d.loading = false
-		# 	scope.d.person = data
-		# .error (data, status, headers, config) ->
-		# 	app.log.httpError(TAG, status, config)
 
 	scope.initActivities = () ->
 		app.getPeople()

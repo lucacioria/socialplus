@@ -3,6 +3,7 @@ import logging
 import datetime as dt
 
 from django.http import HttpResponse
+from google.appengine.api import search
 
 from socialplus.utils import *
 
@@ -21,7 +22,7 @@ def search_activities(request):
         cursor = search.Cursor(web_safe_string=next_page_cursor)
         ids, next_cursor = search_activities_paginated(q, cursor, limit=page_size)
     else:
-        ids, next_cursor = search_activities_paginated(q)
+        ids, next_cursor = search_activities_paginated(q, limit=page_size)
     # get activities from ids
     activities = [x.to_dict_for_json() for x in get_activities(ids)]
     # create json form
