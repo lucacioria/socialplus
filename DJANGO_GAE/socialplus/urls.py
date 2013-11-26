@@ -23,6 +23,7 @@ urlpatterns = patterns('',
     url(r'^providers$', 'socialplus.views.get_providers'),
     # TASKS
     url(r'^tasks$', 'socialplus.views.get_post_tasks'),
+    url(r'^cron/start_task/(?P<name>[^/]+)$', 'socialplus.views.create_task_cron_shortcut'),
     url(r'^tasks/completed$', 'socialplus.views.get_delete_tasks_completed'),
     url(r'^tasks/active$', 'socialplus.views.get_tasks_active'),
     url(r'^tasks/(?P<id_>[^/]+)$', 'socialplus.views.get_task'),

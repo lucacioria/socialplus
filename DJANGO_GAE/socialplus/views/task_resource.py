@@ -52,6 +52,17 @@ def create_task(request):
     # return task and 201
     return HttpResponse(task.to_json(), status=201)
 
+def create_task_cron_shortcut(request, name):
+    # create and put Task
+    task = Task(parent=ndb.Key("Domain", "main"))
+    task.name = name
+    task.creation_time = datetime.datetime.now()
+    id_ = task.put().urlsafe()
+    # call routine url with id of Task object
+    taskqueue.add(url="/start_task/" + id_, method="GET", queue_name="sync-linear", target='sync')
+    # return task and 201
+    return HttpResponse(task.to_json(), status=201)
+
 def get_post_tasks(request):
     if request.method == 'GET':
         return get_tasks(request)
