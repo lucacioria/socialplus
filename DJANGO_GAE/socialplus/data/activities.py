@@ -89,6 +89,19 @@ def save_activity_search_document(a):
     except search.Error:
         logging.exception('PUT of Activity Document FAILED')
 
+def delete_search_index():
+    doc_index = search.Index(name="activities")
+    if doc_index == None: return
+    # looping because get_range by default returns up to 100 documents at a time
+    while True:
+        # Get a list of documents populating only the doc_id field and extract the ids.
+        document_ids = [document.doc_id
+                        for document in doc_index.get_range(ids_only=True)]
+        if not document_ids:
+            break
+        # Delete the documents for the given ids from the Index.
+        doc_index.delete(document_ids)
+
 def _get_activity_access(a, sharedto):
     access = ActivityAccess()
     # set domain_restricted boolean value

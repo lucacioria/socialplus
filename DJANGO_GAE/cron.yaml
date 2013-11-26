@@ -1,0 +1,9 @@
+cron:
+- description: sync activities
+  url: /cron/start_task/syncActivities
+  schedule: every day 5:00
+  timezone: Europe/Paris
+- description: update search index
+  url: /cron/start_task/updateSearchIndex
+  schedule: every day 6:00
+  timezone: Europe/Paris
