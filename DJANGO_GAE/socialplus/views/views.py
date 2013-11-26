@@ -1,7 +1,7 @@
 import httplib2
 import logging
 
-from socialplus.data.activities import Activity
+from socialplus.data.activities import Activity, delete_search_index
 from socialplus.data.domain import Domain
 from socialplus.data.people import Person, User
 from socialplus.data.tasks import Task
@@ -58,14 +58,5 @@ def delete_activities(request):
     return HttpResponse("all activities deleted")
 
 def delete_activities_search_index(request):
-    doc_index = search.Index(name="activities")
-    # looping because get_range by default returns up to 100 documents at a time
-    while True:
-        # Get a list of documents populating only the doc_id field and extract the ids.
-        document_ids = [document.doc_id
-                        for document in doc_index.get_range(ids_only=True)]
-        if not document_ids:
-            break
-        # Delete the documents for the given ids from the Index.
-        doc_index.delete(document_ids)
+    delete_search_index()
     return HttpResponse("all activities removed from search index")
