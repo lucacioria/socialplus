@@ -14,7 +14,6 @@ from authorized_decorator import authorized
 def search_activities(request):
     # get query parameters
     q = request.GET.get('q', '')
-    print q
     next_page_cursor = request.GET.get('nextPageCursor', None)
     page_size = request.GET.get('pageSize', 20)
     # set cursor for paginated queries
