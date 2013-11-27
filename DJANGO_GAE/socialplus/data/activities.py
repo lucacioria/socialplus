@@ -126,6 +126,8 @@ def _get_activity_access(a, sharedto):
             val = access_items[0]["type"]
             if val == "public":
                 access.visibility = "public community"
+            elif val == "domain" and access.domain_restricted:
+                access.visibility = "restricted community"
             else:
                 raise Exception("ACL cannot be parsed for activity " + a["id"])
         else: # can be community private or community restricted
