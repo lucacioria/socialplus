@@ -1,5 +1,5 @@
-application: socialplus
-version: 1
+application: oxylane-plus
+version: 2
 runtime: python27
 api_version: 1
 threadsafe: true
