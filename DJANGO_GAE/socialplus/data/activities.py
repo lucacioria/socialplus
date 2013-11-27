@@ -202,7 +202,9 @@ def search_activities_paginated(query_string, cursor=search.Cursor(), limit=20):
     print "received query with cursor: " + str(cursor.web_safe_string)
     try:
         # build options and query
-        options = search.QueryOptions(cursor=cursor, limit=limit)
+        sort = search.SortExpression(expression='published', direction=search.SortExpression.DESCENDING, default_value="")
+        sort_options = search.SortOptions(expressions=[sort])
+        options = search.QueryOptions(cursor=cursor, limit=limit, sort_options=sort_options)
         query = search.Query(query_string=query_string, options=options)
 
         # search at least once
