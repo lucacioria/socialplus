@@ -195,8 +195,8 @@ def save_activity(a, sharedto, personKey):
 def get_activities(ids=[]):
     if not ids or len(ids) == 0:
         return []
-    q = ndb.get_multi([ndb.Key(urlsafe=x) for x in ids])
-    return q
+    activities = ndb.get_multi([ndb.Key(urlsafe=x) for x in ids])
+    return [a for a in activities if a != None]
 
 def search_activities_paginated(query_string, cursor=search.Cursor(), limit=20):
     ids = []
