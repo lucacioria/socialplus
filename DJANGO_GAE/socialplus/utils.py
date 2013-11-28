@@ -60,3 +60,16 @@ def is_valid_utf8(str):
     except (UnicodeDecodeError, UnicodeEncodeError):
         valid_utf8 = False
     return valid_utf8
+
+def str_to_datetime(s):
+    return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+def call_with_exp_backoff(http_request):
+    for n in range(0, 5):
+        try:
+            result = http_request.execute()
+            break
+        except errors.HttpError, e: #todo should do based on error type?
+            logging.warning("Backoff round %d (%s)" % (n, e.content))
+            time.sleep((2 ** n) + random.randint(0, 1000) / 1000)
+    return result

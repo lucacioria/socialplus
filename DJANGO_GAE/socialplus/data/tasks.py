@@ -15,6 +15,7 @@ class Task(ndb.Model):
     progress_message = ndb.TextProperty(default="waiting..")
     # custom options (depend on task)
     sync_activities_person_email = ndb.StringProperty()
+    sync_activities_days = ndb.IntegerProperty()
     sync_people_org_unit_path = ndb.StringProperty()
     update_report_report_id = ndb.StringProperty()
 
