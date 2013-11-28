@@ -71,9 +71,13 @@ class Activity(ndb.Model):
         return a
 
 def save_activity_search_document(a):
+    # map restricted (boolean) to atom string
     restricted = "yes" if a.access.domain_restricted else "no"
+    # rank is timestamp for efficient chronological sorting
+    rank = int((a.published - datetime.datetime(2010,1,1)).total_seconds())
+    # define document
     doc = search.Document(
-        doc_id = a.key.urlsafe(),
+        doc_id=a.key.urlsafe(),
         fields=[
             search.HtmlField(name='content', value=a.object_.content),
             search.DateField(name='published', value=a.published.date()),
@@ -84,7 +88,8 @@ def save_activity_search_document(a):
             search.AtomField(name='verb', value=a.verb),
             search.AtomField(name='author', value=a.actor.get().user.get().primary_email),
             search.AtomField(name='google_id', value=a.key.id()),
-        ])
+        ],
+        rank=rank)
     try:
         index = search.Index(name="activities")
         index.put(doc)
@@ -203,10 +208,8 @@ def search_activities_paginated(query_string, cursor=search.Cursor(), limit=20):
     index = search.Index(name="activities")
     print "received query with cursor: " + str(cursor.web_safe_string)
     try:
-        # build options and query
-        sort = search.SortExpression(expression='published', direction=search.SortExpression.DESCENDING, default_value="")
-        sort_options = search.SortOptions(expressions=[sort])
-        options = search.QueryOptions(cursor=cursor, limit=limit, sort_options=sort_options)
+        # build options and query (sorting is implicit because of rank)
+        options = search.QueryOptions(cursor=cursor, limit=limit)
         query = search.Query(query_string=query_string, options=options)
 
         # search at least once
