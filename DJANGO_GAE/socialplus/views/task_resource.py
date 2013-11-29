@@ -50,7 +50,7 @@ def create_task(request):
     task.sync_activities_person_email = options.get("personEmail")
     task.update_report_report_id = options.get("reportId")
     task.sync_people_org_unit_path = options.get("orgUnitPath")
-    task.sync_activities_days = int(options.get("days"))
+    task.sync_activities_days = options.get("days") and int(options.get("days"))
     task.sync_activities_update_search_index = options.get("updateSearchIndex")
     #
     task.creation_time = datetime.datetime.now()
