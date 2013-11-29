@@ -194,8 +194,8 @@ def save_activity(a, sharedto, personKey):
         object_.actor_image_url = a["object"]["actor"]["image"]["url"]
 
     a_.object_      = object_
-
-    return a_.put()
+    a_.put()
+    return a_
 
 def get_activities(ids=[]):
     if not ids or len(ids) == 0:
