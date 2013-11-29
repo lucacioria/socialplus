@@ -1,4 +1,8 @@
 import json
+import logging
+import random
+import time
+from apiclient import errors
 import datetime
 import re
 
@@ -70,6 +74,11 @@ def call_with_exp_backoff(http_request):
             result = http_request.execute()
             break
         except errors.HttpError, e: #todo should do based on error type?
+            error = json.loads(e.content)
+            code = error["error"].get('code')
+            if code < 500:
+                print 'Error code: %d' % code
+                raise e
             logging.warning("Backoff round %d (%s)" % (n, e.content))
             time.sleep((2 ** n) + random.randint(0, 1000) / 1000)
     return result
