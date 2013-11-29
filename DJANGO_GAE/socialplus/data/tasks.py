@@ -16,6 +16,7 @@ class Task(ndb.Model):
     # custom options (depend on task)
     sync_activities_person_email = ndb.StringProperty()
     sync_activities_days = ndb.IntegerProperty()
+    sync_activities_update_search_index = ndb.BooleanProperty()
     sync_people_org_unit_path = ndb.StringProperty()
     update_report_report_id = ndb.StringProperty()
 

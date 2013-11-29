@@ -8,14 +8,15 @@ from socialplus.utils import *
 from socialplus.data import *
 from socialplus.api import create_plus_service
 
-from socialplus.data.activities import save_activity
+from socialplus.data.activities import save_activity, save_activity_search_document
 from socialplus.data.people import Person
 from socialplus.routines import update_progress, mark_as_completed
 
 from google.appengine.api import search
 from google.appengine.ext import ndb
 
-def _sync_person_activities(person, days):
+def _sync_person_activities(person, days, update_search_index):
+    logging.info("starting activity sync for " + person.display_name + "...")
     today = datetime.datetime.now()
     # authenticate
     plus = create_plus_service(person.user.get().primary_email)
@@ -53,7 +54,9 @@ def _sync_person_activities(person, days):
     for a in activities:
         request = plus.people().listByActivity(activityId=a["id"], collection="sharedto", fields="totalItems")
         sharedto = call_with_exp_backoff(request)
-        save_activity(a, sharedto, person.key)
+        saved = save_activity(a, sharedto, person.key)
+        if update_search_index:
+            save_activity_search_document(saved)
         statistics["total_activities"] += 1
     return statistics
 
@@ -66,13 +69,17 @@ def sync_activities(task):
     days = 9999 # syncs all activities
     if task.sync_activities_days:
         days = task.sync_activities_days
+    # should also update search index
+    update_search_index = True
+    if task.sync_activities_update_search_index:
+        update_search_index = task.sync_activities_update_search_index
     #
     if task.sync_activities_person_email:
         update_progress(task, \
             "\nstarting update for selected person..\n", 0, 100)
         person = Person.query(Person.user_primary_email==task.sync_activities_person_email).get()
         if person:
-            _sync_person_activities(person, days)
+            _sync_person_activities(person, days, update_search_index)
             mark_as_completed(task, "\nfinished update for " + person.display_name)
         else:
             mark_as_completed(task, "\nFAILED update for " + person.display_name)
@@ -82,7 +89,7 @@ def sync_activities(task):
         q = Person.query().fetch(9999)
         for person in q:
             statistics["total_people"] += 1
-            person_statistics = _sync_person_activities(person, days)
+            person_statistics = _sync_person_activities(person, days, update_search_index)
             statistics["total_activities"] += person_statistics["total_activities"]
             update_progress(task, person.display_name + " (" + str(person_statistics["total_activities"]) + " activities), ", statistics["total_people"], len(q))
         mark_as_completed(task, "\n" + str(statistics["total_people"]) + " people, with " + str(statistics["total_activities"]) + " total activities")
