@@ -21,8 +21,9 @@ def _sync_person_profile(user):
     }
     # update user profile
     try:
-        person_api = plus.people().get(userId=user.primary_email).execute()
-    except: #todo restrict to right exception HttpError 404 dove cazzo si importa
+        request = plus.people().get(userId=user.primary_email)
+        person_api = call_with_exp_backoff(request)
+    except:
         logging.error("Error fetch person %s : %s" % (user.primary_email, traceback.format_exc()))
         return statistics
     person = save_person(person_api, user)
