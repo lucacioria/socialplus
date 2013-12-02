@@ -162,6 +162,13 @@ def save_activity(a, sharedto, personKey):
 
     # update existing activity
     if old_a_:
+        if old_a_.object_.plusones != a["object"]["plusoners"]["totalItems"] or \
+            old_a_.object_.reshares != a["object"]["resharers"]["totalItems"]:
+            # udpate all mutable values
+            old_a_.object_.plusones = a["object"]["plusoners"]["totalItems"]
+            old_a_.object_.reshares = a["object"]["resharers"]["totalItems"]
+            # save back to datastore
+            old_a_.put()
         return old_a_
 
     # create new activity
