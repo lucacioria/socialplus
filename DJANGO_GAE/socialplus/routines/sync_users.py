@@ -4,7 +4,6 @@ import json
 import logging
 import time
 import random
-from apiclient import errors
 
 from socialplus.api import create_directory_service, CURRENT_DOMAIN, API_ACCESS_DATA
 from socialplus.routines import update_progress, mark_as_completed
