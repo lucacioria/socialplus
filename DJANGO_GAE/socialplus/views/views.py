@@ -7,15 +7,24 @@ from socialplus.data.people import Person, User
 from socialplus.data.tasks import Task
 from socialplus.utils import *
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from google.appengine.ext import ndb
 from google.appengine.api import search
+from google.appengine.api import users
 
 @ensure_csrf_cookie
 def get_cookie(request):
     return HttpResponse("this GET is to set the CSRF cookie")
+
+def login(request):
+    url = users.create_login_url('/')
+    return HttpResponseRedirect(url)
+
+def logout(request):
+    url = users.create_logout_url('/')
+    return HttpResponseRedirect(url)
 
 def get_communities(request):
     q = Activity.query(projection=["access.community_name"], distinct=True).fetch(9999)
