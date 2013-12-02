@@ -11,6 +11,7 @@ mixin entry(name, state)
         mixin entry('activities', 'activities.simple')
         //mixin entry('profile', 'person')
         mixin entry('reports', 'reports')
+        mixin entry('logout', 'logout')
         //mixin entry('tags', 'tags.experts')
 
     .alert.alert-success(style="position:fixed; top: 10px; right: 10px; z-index: 99", ng-show="well.alerts.successMessage && well.alerts.successMessage != ''") {{well.alerts.successMessage}}

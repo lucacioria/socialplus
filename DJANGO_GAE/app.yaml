@@ -14,8 +14,8 @@ handlers:
   expiration: '0'
 
 - url: /
-  script: main.application
-  login: required
+  upload: public/html/main.html
+  static_files: public/html/main.html
 
 libraries:
 - name: pycrypto
