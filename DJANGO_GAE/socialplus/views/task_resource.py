@@ -64,6 +64,7 @@ def create_task_cron_shortcut(request, name):
     # create and put Task
     task = Task(parent=ndb.Key("Domain", "main"))
     task.name = name
+    task.sync_activities_days = 30
     task.creation_time = datetime.datetime.now()
     id_ = task.put().urlsafe()
     # call routine url with id of Task object
