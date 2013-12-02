@@ -76,7 +76,8 @@ def call_with_exp_backoff(http_request):
         except errors.HttpError, e: #todo should do based on error type?
             error = json.loads(e.content)
             code = error["error"].get('code')
-            if code < 500:
+            # todo better manage different error codes
+            if code < 500 and code != 403: # 403 usually is limit of unauthenticated requests (google bug?)
                 print 'Error code: %d' % code
                 raise e
             logging.warning("Backoff round %d (%s)" % (n, e.content))
