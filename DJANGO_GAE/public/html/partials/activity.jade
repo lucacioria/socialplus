@@ -1,7 +1,7 @@
 div.row.panel
 	div.col-lg-3
 		div
-			img.img-thumbnail(src="{{a.actor.imageUrl}}", style="float:left")
+			img.img-thumbnail(ng-src="{{a.actor.imageUrl}}", style="float:left")
 			div(style="float:left; margin-left: 15px")
 				a(href="#/person/details/{{a.actor.id}}") {{a.actor.displayName}}
 				br
