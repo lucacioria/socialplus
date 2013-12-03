@@ -2,7 +2,6 @@
 import httplib2
 import json
 import logging
-import pprint
 
 from socialplus.utils import *
 from socialplus.data import *

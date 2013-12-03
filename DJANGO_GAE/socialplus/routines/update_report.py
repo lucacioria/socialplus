@@ -2,7 +2,6 @@
 import httplib2
 import json
 import logging
-import pprint
 import datetime
 
 from socialplus.utils import *

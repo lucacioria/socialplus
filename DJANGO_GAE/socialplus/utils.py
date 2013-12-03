@@ -78,7 +78,7 @@ def call_with_exp_backoff(http_request):
             code = error["error"].get('code')
             # todo better manage different error codes
             if code < 500 and code != 403: # 403 usually is limit of unauthenticated requests (google bug?)
-                print 'Error code: %d' % code
+                logging.error('Error code: %d' % code)
                 raise e
             logging.warning("Backoff round %d (%s)" % (n, e.content))
             time.sleep((2 ** n) + random.randint(0, 1000) / 1000)

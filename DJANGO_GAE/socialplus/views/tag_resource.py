@@ -16,7 +16,6 @@ from google.appengine.ext import ndb
 def get_tags(request):
     from itertools import chain
     q = [dict(chain({"id_": x.key.urlsafe()}.items(), x.to_dict().items())) for x in Tag.query().fetch(100)]
-    print(format_json(q))
     for a in q:
         a["search_strings"] = [{"value": x} for x in a["search_strings"]]
     return HttpResponse(format_json(q))
@@ -42,7 +41,6 @@ def update_tag(request, tagId):
     key = ndb.Key(urlsafe=tagId)
     # new data
     data = json.loads(request.body)
-    print(format_json(data))
     tag = key.get()
     tag.name = data["name"]
     tag.search_strings = [x["value"] for x in data["search_strings"]]

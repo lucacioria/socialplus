@@ -69,7 +69,7 @@ def create_plus_service(user_email):
     if current_plus_service["user_email"] == user_email and current_plus_service["service"]:
         return current_plus_service["service"]
     else:
-        print("NEW AUTHENTICATION NECESSARY: current email is " + current_plus_service["user_email"] + " and new email is " + user_email)
+        logging.info("NEW AUTHENTICATION NECESSARY: current email is " + current_plus_service["user_email"] + " and new email is " + user_email)
 
     f = file(API_ACCESS_DATA[CURRENT_DOMAIN]["SERVICE_ACCOUNT_PEM_FILE_PATH"], 'rb')
     key = f.read()

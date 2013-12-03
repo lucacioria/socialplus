@@ -213,7 +213,7 @@ def get_activities(ids=[]):
 def search_activities_paginated(query_string, cursor=search.Cursor(), limit=20):
     ids = []
     index = search.Index(name="activities")
-    print "received query with cursor: " + str(cursor.web_safe_string)
+    logging.debug("received query with cursor: " + str(cursor.web_safe_string))
     try:
         # build options and query (sorting is implicit because of rank)
         options = search.QueryOptions(cursor=cursor, limit=limit)
@@ -224,13 +224,13 @@ def search_activities_paginated(query_string, cursor=search.Cursor(), limit=20):
         number_retrieved = len(result.results)
         cursor = result.cursor
 
-        print "search api retreived " +str(number_retrieved) + " results, out of approx " + str(result.number_found)
+        logging.debug("search api retreived " +str(number_retrieved) + " results, out of approx " + str(result.number_found))
 
         if number_retrieved > 0:
             for doc in result.results:
                 ids.append(doc.doc_id)
 
-        print "returning ids.length " +str(len(ids))
+        logging.debug("returning ids.length " +str(len(ids)))
 
         return ids, cursor
     except search.Error:
