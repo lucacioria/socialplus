@@ -16,7 +16,6 @@ window.myApp.config ['$httpProvider', '$stateProvider', '$urlRouterProvider',
             error = (response) ->
                 if response.status is 401
                     deferred = $q.defer()
-                    console.log "Redirecting to login.."
                     $rootScope.$broadcast "event:auth-loginRequired", response
                     $q.reject response
             (promise) ->
@@ -105,7 +104,8 @@ window.myApp.run ['$rootScope', '$state', '$stateParams', (rootScope, state, sta
     rootScope.$stateParams = stateParams
     
     rootScope.$on "event:auth-loginRequired", () ->
-        state.go "login"
+        console.log "Redirecting to login.."
+        window.location.href = "/login"
     ]
 
 window.myApp.factory 'Well', ['$http', (http) ->
